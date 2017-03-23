@@ -1,0 +1,14 @@
+death.attack.torched=%1$s(이)가 %2$s의 횃불에 맞아서 사망하셧습니다
+death.attack.torchedSelf=%1$s(이)가 횃불로 자기자신을 자해 했습니다.
+death.attack.torchedRand=%1$s(이)가 하늘에서 떨어지는 횃불에 맞았습니다.
+death.attack.torchedFire=%2$s이(가) %1$s가 내리게 한 횃불비에 맞아서 사망하셧습니다
+death.attack.torchedFireSelf=%1$s이(가)자신이 맞은 횃불비에 맞아서 사망하셧습니다
+
+death.attack.rpt=%2$s이(가) %1$s에게 횃불로켓을 발사하였습니다.
+death.attack.rptSelf=%1$s이(가) 자신이 쏜 로켓에 맞아 사망하셧습니다.
+death.attack.rptRand=%1$s이(가) 자신이 쏜 로켓에 맞아 사망하셧습니다
+
+item.torched.torchgun.name=횃불 총
+item.torched.torchrocket.name=횃불 로켓
+item.torched.torchfirework.name=횃불 로켓 추진기
+item.torched.torchlauncher.name=RPT 런쳐

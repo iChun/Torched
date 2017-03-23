@@ -1,0 +1,20 @@
+[
+{
+  "modid" : "torched",
+  "name" : "Torched",
+  "version" : "${version}",
+  "url" : "http://ichun.me/mods/torched/",
+  "credits" : "",
+  "authorList": [
+    "iChun"
+  ],
+  "description": "Adds a couple of items which aids with torch placement. Mainly a gun, rocket, and launcher.",
+  "updateUrl" : "",
+  "parent" : "",
+  "screenshots": [
+  ],
+  "dependencies": [
+    "Forge", "iChunUtil"
+  ]
+}
+]

@@ -1,0 +1,14 @@
+death.attack.torched=%1$s è stato colpito da %2$s con una torcia
+death.attack.torchedSelf=%1$s si colpisce da solo con una torcia
+death.attack.torchedRand=%1$s è stato colpito da una torcia vagante
+death.attack.torchedFire=%2$s fa piovere fuoco su %1$s
+death.attack.torchedFireSelf=%1$s fa piovere fuoco su se stesso
+
+death.attack.rpt=%2$s spara un rocket propelled torch a %1$s
+death.attack.rptSelf=%1$s si colpisce da solo con un rocket propelled torch
+death.attack.rptRand=%1$s è stato colpito da rocket propelled torch
+
+item.torched.torchgun.name=Spara torcie
+item.torched.torchrocket.name=Missile torcia
+item.torched.torchfirework.name=Missile a torcie
+item.torched.torchlauncher.name=Base di lancio MT

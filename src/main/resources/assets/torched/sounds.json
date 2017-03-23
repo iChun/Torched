@@ -1,0 +1,14 @@
+{
+  "rpt": {
+    "category": "player",
+    "sounds": [
+      "torched:rpt"
+    ]
+  },
+  "tube": {
+    "category": "player",
+    "sounds": [
+      "torched:tube"
+    ]
+  }
+}
