@@ -45,9 +45,6 @@ public class ProxyClient extends ProxyCommon
         ModelLoader.setCustomModelResourceLocation(Torched.itemTorchLauncher, 0, new ModelResourceLocation("torched:torchlauncher", "inventory"));
 
         ModelBakery.registerItemVariants(Torched.itemTorchFirework, new ResourceLocation("torched", "torchfirework"), new ResourceLocation("torched", "torchrpt"));
-
-        ItemHandler.registerDualHandedItem(ItemTorchGun.class);
-        ItemHandler.registerDualHandedItem(ItemTorchLauncher.class);
     }
 
     @Override

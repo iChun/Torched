@@ -1,5 +1,6 @@
 package me.ichun.mods.torched.common.core;
 
+import me.ichun.mods.ichunutil.common.item.ItemHandler;
 import me.ichun.mods.torched.common.Torched;
 import me.ichun.mods.torched.common.entity.EntityTorch;
 import me.ichun.mods.torched.common.entity.EntityTorchFirework;
@@ -50,6 +51,9 @@ public class ProxyCommon
 
         Torched.soundRPT = GameRegistry.register(new SoundEvent(new ResourceLocation("torched", "rpt")).setRegistryName(new ResourceLocation("torched", "rpt")));
         Torched.soundTube = GameRegistry.register(new SoundEvent(new ResourceLocation("torched", "tube")).setRegistryName(new ResourceLocation("torched", "tube")));
+
+        ItemHandler.registerDualHandedItem(ItemTorchGun.class);
+        ItemHandler.registerDualHandedItem(ItemTorchLauncher.class);
     }
 
     public void nudgeHand(EntityPlayer player) {} //TODO test subtitles.

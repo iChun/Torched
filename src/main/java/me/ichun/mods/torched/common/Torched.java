@@ -27,7 +27,7 @@ public class Torched
 {
     public static final String MOD_NAME = "Torched";
     public static final String MOD_ID = "torched";
-    public static final String VERSION = iChunUtil.VERSION_MAJOR + ".0.0";
+    public static final String VERSION = iChunUtil.VERSION_MAJOR + ".0.1";
 
     @Instance(Torched.MOD_ID)
     public static Torched instance;
