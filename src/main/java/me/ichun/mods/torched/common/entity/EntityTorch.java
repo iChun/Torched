@@ -406,6 +406,7 @@ public class EntityTorch extends Entity
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(double distance)
     {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10D;
