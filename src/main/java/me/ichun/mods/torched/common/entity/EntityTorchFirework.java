@@ -5,6 +5,7 @@ import me.ichun.mods.ichunutil.common.item.ItemHandler;
 import me.ichun.mods.torched.common.Torched;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -22,7 +23,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class EntityTorchFirework extends Entity
@@ -139,7 +139,7 @@ public class EntityTorchFirework extends Entity
 
     public void setThrowableHeading(double par1, double par3, double par5, float par7, float par8)
     {
-        float var9 = MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5);
+        float var9 = MathHelper.sqrt(par1 * par1 + par3 * par3 + par5 * par5);
         par1 /= (double)var9;
         par3 /= (double)var9;
         par5 /= (double)var9;
@@ -152,7 +152,7 @@ public class EntityTorchFirework extends Entity
         this.motionX = par1;
         this.motionY = par3;
         this.motionZ = par5;
-        float var10 = MathHelper.sqrt_double(par1 * par1 + par5 * par5);
+        float var10 = MathHelper.sqrt(par1 * par1 + par5 * par5);
         this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(par1, par5) * 180.0D / Math.PI);
         this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(par3, (double)var10) * 180.0D / Math.PI);
     }
@@ -278,7 +278,7 @@ public class EntityTorchFirework extends Entity
                     forceBlow = true;
                 }
 
-                if(isCollidedVertically && worldObj.isRemote)
+                if(collidedVertically && world.isRemote)
                 {
                     motionY = 0.01D;
                 }
@@ -286,17 +286,17 @@ public class EntityTorchFirework extends Entity
                 {
                     Vec3d var17 = new Vec3d(this.posX, this.posY, this.posZ);
                     Vec3d var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-                    RayTraceResult mop = this.worldObj.rayTraceBlocks(var17, var3, false, true, false);
+                    RayTraceResult mop = this.world.rayTraceBlocks(var17, var3, false, true, false);
                     var17 = new Vec3d(this.posX, this.posY, this.posZ);
                     var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 
                     if (mop != null)
                     {
-                        var3 = new Vec3d(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+                        var3 = new Vec3d(mop.hitVec.x, mop.hitVec.y, mop.hitVec.z);
                     }
 
                     Entity collidedEnt = null;
-                    List var6 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+                    List var6 = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1.0D));
                     double var7 = 0.0D;
                     int var9;
                     float var11;
@@ -313,7 +313,7 @@ public class EntityTorchFirework extends Entity
                         if (var10.canBeCollidedWith() && (var10 != initiator || age >= 3))
                         {
                             var11 = 0.3F;
-                            AxisAlignedBB var12 = var10.getEntityBoundingBox().expand((double)var11, (double)var11, (double)var11);
+                            AxisAlignedBB var12 = var10.getEntityBoundingBox().grow((double)var11);
                             RayTraceResult var13 = var12.calculateIntercept(var17, var3);
 
                             if (var13 != null)
@@ -350,9 +350,9 @@ public class EntityTorchFirework extends Entity
                         }
                         if(mop != null)
                         {
-                            posX = mop.hitVec.xCoord - (motionX * 1.05D);
-                            posY = mop.hitVec.yCoord - (motionY * 1.05D);
-                            posZ = mop.hitVec.zCoord - (motionZ * 1.05D);
+                            posX = mop.hitVec.x - (motionX * 1.05D);
+                            posY = mop.hitVec.y - (motionY * 1.05D);
+                            posZ = mop.hitVec.z - (motionZ * 1.05D);
                         }
                         forceBlow = true;
                     }
@@ -365,9 +365,9 @@ public class EntityTorchFirework extends Entity
                 }
                 else
                 {
-                    this.moveEntity(this.motionX, this.motionY, this.motionZ);
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
                 }
-                float var1 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
                 this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
 
                 while (this.rotationYaw - this.prevRotationYaw < -180.0F)
@@ -382,9 +382,9 @@ public class EntityTorchFirework extends Entity
 
                 fuel -= getTorches();
 
-                if(!worldObj.isRemote && (fuel <= 0.0F || isSplit && motionY < -0.1D || forceBlow) && !isDead)
+                if(!world.isRemote && (fuel <= 0.0F || isSplit && motionY < -0.1D || forceBlow) && !isDead)
                 {
-                    worldObj.createExplosion(initiator, posX, posY, posZ, getRocket() ? 2F : gunpowderCount < 5 ? 0.5F : 3.5F, false);
+                    world.createExplosion(initiator, posX, posY, posZ, getRocket() ? 2F : gunpowderCount < 5 ? 0.5F : 3.5F, false);
                     if(getSplits() > 0)
                     {
                         int torch = (int)Math.floor((float)getTorches() / ((float)getSplits() + 1));
@@ -392,23 +392,23 @@ public class EntityTorchFirework extends Entity
                         float splits = getSplits() + 1;
                         for(int i = 0; i <= getSplits() && i < getTorches(); i++)
                         {
-                            worldObj.spawnEntityInWorld(new EntityTorchFirework(worldObj, posX, posY + (double)0.2F * ((float)this.getTorches() / 96F), posZ, i * 360F / splits, torch, gunPowder, this));
+                            world.spawnEntity(new EntityTorchFirework(world, posX, posY + (double)0.2F * ((float)this.getTorches() / 96F), posZ, i * 360F / splits, torch, gunPowder, this));
                         }
                     }
                     else
                     {
                         for(int i = 0; i < getTorches(); i++)
                         {
-                            rotationYaw = worldObj.rand.nextFloat() * 360F;
-                            rotationPitch = worldObj.rand.nextFloat() * -85F - 5F;
-                            worldObj.spawnEntityInWorld(new EntityTorch(worldObj, this, initiator));
+                            rotationYaw = world.rand.nextFloat() * 360F;
+                            rotationPitch = world.rand.nextFloat() * -85F - 5F;
+                            world.spawnEntity(new EntityTorch(world, this, initiator));
                         }
                     }
                     setDead();
                     return;
                 }
 
-                float var20 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                float var20 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
                 this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
 
                 while (this.rotationPitch - this.prevRotationPitch >= 180.0F)
@@ -429,7 +429,7 @@ public class EntityTorchFirework extends Entity
                 this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
                 this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
             }
-            else if(!worldObj.isRemote && worldObj.getWorldTime() % 2L == 0 && activating)
+            else if(!world.isRemote && world.getWorldTime() % 2L == 0 && activating)
             {
                 int minus = (int)Math.ceil((getGP() / 100) + 1);
                 addGP(-minus);
@@ -452,9 +452,9 @@ public class EntityTorchFirework extends Entity
                 EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
         }
-        else if(!worldObj.isRemote && worldObj.getWorldTime() % 2L == 0)
+        else if(!world.isRemote && world.getWorldTime() % 2L == 0)
         {
-            List list = worldObj.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().expand(0.0D, 0.2D, 0.0D));
+            List list = world.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().grow(0.0D, 0.2D, 0.0D));
             for(int i = 0; i < list.size(); i++)
             {
                 Entity ent = (Entity)list.get(i);
@@ -464,41 +464,41 @@ public class EntityTorchFirework extends Entity
                 }
 
                 EntityItem item = (EntityItem)ent;
-                if(item.getEntityItem() != null)
+                if(item.getItem() != null)
                 {
-                    if(item.getEntityItem().getItem() == Item.getItemFromBlock(Blocks.TORCH))
+                    if(item.getItem().getItem() == Item.getItemFromBlock(Blocks.TORCH))
                     {
-                        if(getTorches() + item.getEntityItem().stackSize <= 512)
+                        if(getTorches() + item.getItem().getCount() <= 512)
                         {
-                            addTorches(item.getEntityItem().stackSize);
+                            addTorches(item.getItem().getCount());
                             item.setDead();
                         }
                         else if(getTorches() < 512)
                         {
-                            addTorches((getTorches() + item.getEntityItem().stackSize) - 512);
-                            item.getEntityItem().stackSize -= ((getTorches() + item.getEntityItem().stackSize) - 512);
+                            addTorches((getTorches() + item.getItem().getCount()) - 512);
+                            item.getItem().shrink(((getTorches() + item.getItem().getCount()) - 512));
                         }
                     }
-                    else if(item.getEntityItem().getItem() == Items.GUNPOWDER)
+                    else if(item.getItem().getItem() == Items.GUNPOWDER)
                     {
-                        if(getGP() + item.getEntityItem().stackSize <= 512)
+                        if(getGP() + item.getItem().getCount() <= 512)
                         {
-                            addGP(item.getEntityItem().stackSize);
+                            addGP(item.getItem().getCount());
                             item.setDead();
                         }
                         else if(getGP() < 512)
                         {
-                            addGP((getGP() + item.getEntityItem().stackSize) - 512);
-                            item.getEntityItem().stackSize = (getGP() + item.getEntityItem().stackSize) - 512;
+                            addGP((getGP() + item.getItem().getCount()) - 512);
+                            item.getItem().shrink((getGP() + item.getItem().getCount()) - 512);;
                         }
                     }
                 }
             }
-            if(worldObj.getBlockState(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))).getBlock() == Blocks.FIRE)
+            if(world.getBlockState(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))).getBlock() == Blocks.FIRE)
             {
                 setFire(8);
             }
-            else if(worldObj.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))) || worldObj.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY) - 1, (int)Math.floor(posZ))))
+            else if(world.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))) || world.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY) - 1, (int)Math.floor(posZ))))
             {
                 extinguish();
                 activating = true;
@@ -508,9 +508,9 @@ public class EntityTorchFirework extends Entity
                 setActive(true);
                 EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
-            else if(!worldObj.isSideSolid(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY - 1), (int)Math.floor(posZ)), EnumFacing.getFront(1), true))
+            else if(!world.isSideSolid(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY - 1), (int)Math.floor(posZ)), EnumFacing.getFront(1), true))
             {
-                this.attackEntityFrom(DamageSource.generic, 1);
+                this.attackEntityFrom(DamageSource.GENERIC, 1);
             }
 
         }
@@ -529,75 +529,72 @@ public class EntityTorchFirework extends Entity
 
     @Override
     @SideOnly(Side.CLIENT)
-    public int getBrightnessForRender(float par1)
+    public int getBrightnessForRender()
     {
         return 15728880;
     }
 
     @Override
-    public boolean processInitialInteract(EntityPlayer player, @Nullable ItemStack stack, EnumHand hand)
+    public boolean processInitialInteract(EntityPlayer player, EnumHand hand)
     {
-        if(!worldObj.isRemote && !activating)
+        if(!world.isRemote && !activating)
         {
             ItemStack is = player.getHeldItem(hand);
-            if(is != null)
+            if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH) && getTorches() < 512)
             {
-                if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH) && getTorches() < 512)
+                addTorches(1);
+                if(!player.capabilities.isCreativeMode)
                 {
-                    addTorches(1);
-                    if(!player.capabilities.isCreativeMode)
+                    is.shrink(1);
+                    if(is.isEmpty())
                     {
-                        is.stackSize--;
-                        if(is.stackSize <= 0)
-                        {
-                            player.inventory.mainInventory[player.inventory.currentItem] = null;
-                        }
+                        player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
                     }
-                    player.swingArm(hand);
-                    return true;
                 }
-                else if(is.getItem() == Items.GUNPOWDER && getGP() < 512)
+                player.swingArm(hand);
+                return true;
+            }
+            else if(is.getItem() == Items.GUNPOWDER && getGP() < 512)
+            {
+                addGP(1);
+                if(!player.capabilities.isCreativeMode)
                 {
-                    addGP(1);
-                    if(!player.capabilities.isCreativeMode)
+                    is.shrink(1);
+                    if(is.isEmpty())
                     {
-                        is.stackSize--;
-                        if(is.stackSize <= 0)
-                        {
-                            player.inventory.mainInventory[player.inventory.currentItem] = null;
-                        }
+                        player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
                     }
-                    player.swingArm(hand);
-                    return true;
                 }
-                else if(is.getItem() == Items.FLINT_AND_STEEL)
+                player.swingArm(hand);
+                return true;
+            }
+            else if(is.getItem() == Items.FLINT_AND_STEEL)
+            {
+                activating = true;
+                if(!player.capabilities.isCreativeMode)
                 {
-                    activating = true;
-                    if(!player.capabilities.isCreativeMode)
-                    {
-                        is.setItemDamage(is.getItemDamage() + 1);
-                    }
-                    initiator = player;
-                    player.swingArm(hand);
-                    return true;
+                    is.setItemDamage(is.getItemDamage() + 1);
                 }
-                else if(is.getItem() == Items.GOLD_NUGGET && getSplits() < 16)
+                initiator = player;
+                player.swingArm(hand);
+                return true;
+            }
+            else if(is.getItem() == Items.GOLD_NUGGET && getSplits() < 16)
+            {
+                addSplit();
+                if(!player.capabilities.isCreativeMode)
                 {
-                    addSplit();
-                    if(!player.capabilities.isCreativeMode)
+                    is.shrink(1);
+                    if(is.isEmpty())
                     {
-                        is.stackSize--;
-                        if(is.stackSize <= 0)
-                        {
-                            player.inventory.mainInventory[player.inventory.currentItem] = null;
-                        }
+                        player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
                     }
-                    player.swingArm(hand);
-                    return true;
                 }
+                player.swingArm(hand);
+                return true;
             }
         }
-        if(worldObj.isRemote && player.getHeldItem(hand) != null && (player.getHeldItem(hand).getItem() == Item.getItemFromBlock(Blocks.TORCH) || player.getHeldItem(hand).getItem() == Items.GUNPOWDER || player.getHeldItem(hand).getItem() == Items.FLINT_AND_STEEL || player.getHeldItem(hand).getItem() == Items.GOLD_NUGGET))
+        if(world.isRemote && (player.getHeldItem(hand).getItem() == Item.getItemFromBlock(Blocks.TORCH) || player.getHeldItem(hand).getItem() == Items.GUNPOWDER || player.getHeldItem(hand).getItem() == Items.FLINT_AND_STEEL || player.getHeldItem(hand).getItem() == Items.GOLD_NUGGET))
         {
             player.swingArm(hand);
             return true;
@@ -608,14 +605,14 @@ public class EntityTorchFirework extends Entity
     @Override
     public boolean attackEntityFrom(DamageSource source, float i)
     {
-        if(source == DamageSource.inFire || source == DamageSource.onFire)
+        if(source.isFireDamage())
         {
             setFire(8);
             return true;
         }
         if(i > 0 && !getActive())
         {
-            if(!worldObj.isRemote)
+            if(!world.isRemote)
             {
                 while(getTorches() > 0)
                 {

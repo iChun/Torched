@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -23,18 +24,19 @@ public class ItemTorchFirework extends Item
     }
 
     @Override
-    public EnumActionResult onItemUse(ItemStack is, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
+    public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
+        ItemStack is = player.getHeldItem(hand);
         if(is.getItemDamage() == 0)
         {
             if(side == EnumFacing.UP)
             {
                 if(world.isSideSolid(pos, side, false))
                 {
-                    is.stackSize--;
+                    is.shrink(1);
                     if(!world.isRemote)
                     {
-                        world.spawnEntityInWorld(new EntityTorchFirework(world, pos.getX(), pos.getY(), pos.getZ(), player.capabilities.isCreativeMode && player.isSneaking()));
+                        world.spawnEntity(new EntityTorchFirework(world, pos.getX(), pos.getY(), pos.getZ(), player.capabilities.isCreativeMode && player.isSneaking()));
                     }
                     return EnumActionResult.SUCCESS;
                 }
@@ -54,9 +56,12 @@ public class ItemTorchFirework extends Item
     }
 
     @Override
-    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        itemList.add(new ItemStack(this, 1, 0));
-        itemList.add(new ItemStack(this, 1, 1));
+        if (this.isInCreativeTab(tab))
+        {
+            items.add(new ItemStack(this, 1, 0));
+            items.add(new ItemStack(this, 1, 1));
+        }
     }
 }

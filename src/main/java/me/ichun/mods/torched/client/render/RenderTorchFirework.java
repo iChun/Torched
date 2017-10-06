@@ -51,7 +51,7 @@ public class RenderTorchFirework extends Render<EntityTorchFirework>
         GlStateManager.rotate(180F, 1.0F, 0.0F, 0.0F);
 
         IBlockState state = block.getStateFromMeta(0);
-        RendererHelper.renderBakedModel(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, null);
+        RendererHelper.renderBakedModel(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, ItemStack.EMPTY);
 
         GlStateManager.enableLighting();
 

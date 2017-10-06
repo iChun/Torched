@@ -12,3 +12,9 @@ item.torched.torchgun.name=Torch Gun
 item.torched.torchrocket.name=Torch Rocket
 item.torched.torchfirework.name=Rocket Propelled Torch
 item.torched.torchlauncher.name=RPT Launcher
+
+entity.torchEnt.name=Torch Entity
+entity.torchFireworkEnt.name=Torch Firework
+
+subtitles.torched.firingrpt=RPT Launcher firing
+subtitles.torched.firingtorchgun=Torch gun firing

@@ -20,6 +20,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.Pair;
@@ -103,20 +104,21 @@ public class ItemRenderTorchGun implements IModelBase
 
         float var22 = 0.45F;
         int count = 64;
-        if(lastPlayer == mc.thePlayer && !Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode)
+        if(lastPlayer == mc.player && !Minecraft.getMinecraft().player.capabilities.isCreativeMode)
         {
             count = 0;
-            ItemStack[] stacks = Minecraft.getMinecraft().thePlayer.inventory.mainInventory;
+            NonNullList<ItemStack> stacks = Minecraft.getMinecraft().player.inventory.mainInventory;
             for(ItemStack is : stacks)
             {
-                if(is != null && is.getItem() == Item.getItemFromBlock(Blocks.TORCH))
+                if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH))
                 {
-                    count += is.stackSize;
+                    count += is.getCount();
+                    if(count > 64)
+                    {
+                        count = 64;
+                        break;
+                    }
                 }
-            }
-            if(count > 64)
-            {
-                count = 64;
             }
         }
 
@@ -192,7 +194,7 @@ public class ItemRenderTorchGun implements IModelBase
 
         if(heldStack != null && heldStack.getItemDamage() < heldStack.getMaxDamage())
         {
-            ItemStack is = Torched.eventHandlerClient.firing > 0 && lastPlayer == mc.thePlayer ? powder : flintSteel;
+            ItemStack is = Torched.eventHandlerClient.firing > 0 && lastPlayer == mc.player ? powder : flintSteel;
 
             IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(is);
             GlStateManager.translate(-0.125F, 0.5F, 0.2F);

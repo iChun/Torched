@@ -1,0 +1,5 @@
+{
+  "recipes": {
+    "torchgun_repair": "me.ichun.mods.torched.common.item.crafting.RecipeTorchGun$Factory"
+  }
+}

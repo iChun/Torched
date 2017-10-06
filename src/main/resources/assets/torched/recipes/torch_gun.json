@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WI ",
+    "IWI",
+    "GIP"
+  ],
+  "key": {
+    "W": {
+      "item": "#plankWood"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "P": {
+      "item": "minecraft:gunpowder"
+    }
+  },
+  "result": {
+    "item": "torched:torchgun",
+    "data": 65
+  }
+}
+ 

@@ -1,0 +1,17 @@
+{
+  "type": "torched:torchgun_repair",
+  "ingredients": [
+      {
+        "item": "torched:torchgun",
+        "data": 32767
+      },
+      {
+        "item": "minecraft:flint_and_steel"
+      }
+  ],
+  "result": {
+    "item": "torched:torchgun",
+    "data": 65
+  }
+}
+ 

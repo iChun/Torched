@@ -1,7 +1,7 @@
 package me.ichun.mods.torched.client.entity;
 
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -41,7 +41,7 @@ public class ParticleTorchFlameFX extends Particle
     }
 
     @Override
-    public void renderParticle(VertexBuffer worldRendererIn, Entity entityIn, float par2, float par3, float par4, float par5, float par6, float par7)
+    public void renderParticle(BufferBuilder worldRendererIn, Entity entityIn, float par2, float par3, float par4, float par5, float par6, float par7)
     {
         float var8 = ((float)this.particleAge + par2) / (float)this.particleMaxAge;
         this.particleScale = this.flameScale * (1.0F - var8 * var8 * 0.5F) * scale;
@@ -69,12 +69,12 @@ public class ParticleTorchFlameFX extends Particle
             this.setExpired();
         }
 
-        this.moveEntity(this.motionX, this.motionY, this.motionZ);
+        this.move(this.motionX, this.motionY, this.motionZ);
         this.motionX *= 0.9599999785423279D;
         this.motionY *= 0.9599999785423279D;
         this.motionZ *= 0.9599999785423279D;
 
-        if (this.isCollided)
+        if (this.onGround)
         {
             this.motionX *= 0.699999988079071D;
             this.motionZ *= 0.699999988079071D;

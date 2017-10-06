@@ -3,12 +3,14 @@
     "category": "player",
     "sounds": [
       "torched:rpt"
-    ]
+    ],
+    "subtitle": "subtitles.torched.firingrpt"
   },
   "tube": {
     "category": "player",
     "sounds": [
       "torched:tube"
-    ]
+    ],
+    "subtitle": "subtitles.torched.firingtorchgun"
   }
 }

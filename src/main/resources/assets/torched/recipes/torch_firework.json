@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TTT",
+    "TGT",
+    "TTT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:torch"
+    },
+    "G": {
+      "item": "minecraft:gunpowder"
+    }
+  },
+  "result": {
+    "item": "torched:torchfirework",
+    "data": 1
+  }
+}
+ 

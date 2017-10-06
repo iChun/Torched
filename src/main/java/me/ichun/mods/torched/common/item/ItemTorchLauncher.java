@@ -10,10 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -44,31 +41,28 @@ public class ItemTorchLauncher extends Item
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(ItemStack is, World world, EntityPlayer player, EnumHand hand)
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand)
     {
 //        player.setActiveHand(hand);
-        if(ItemHandler.getUsableDualHandedItem(player) == is && (player.capabilities.isCreativeMode || EntityHelper.consumeInventoryItem(player.inventory, Torched.itemTorchFirework, 1, 1)))
+        if(ItemHandler.getUsableDualHandedItem(player) == player.getHeldItem(hand) && (player.capabilities.isCreativeMode || EntityHelper.consumeInventoryItem(player.inventory, Torched.itemTorchFirework, 1, 1)))
         {
             Torched.proxy.nudgeHand(player);
             if(!world.isRemote)
             {
                 EntityHelper.playSoundAtEntity(player, Torched.soundRPT, SoundCategory.PLAYERS, 1.0F, 0.9F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
-                player.worldObj.spawnEntityInWorld(new EntityTorchFirework(player.worldObj, player));
+                player.world.spawnEntity(new EntityTorchFirework(player.world, player));
             }
         }
-        return new ActionResult(EnumActionResult.PASS, is);
+        return new ActionResult(EnumActionResult.PASS, player.getHeldItem(hand));
     }
 
     @Override
-    public void getSubItems(Item item, CreativeTabs par2CreativeTabs, List itemList)
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        itemList.add(new ItemStack(this, 1));
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
-    public void addInformation(ItemStack is, EntityPlayer player, List list, boolean flag)
-    {
+        if (this.isInCreativeTab(tab))
+        {
+            items.add(new ItemStack(this, 1));
+        }
     }
 
     @Override

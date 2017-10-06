@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
@@ -34,7 +35,7 @@ public class RenderTorch extends Render<EntityTorch>
         GlStateManager.rotate(90F + torch.prevRotationPitch + (torch.rotationPitch - torch.prevRotationPitch) * f1, 0.0F, 0.0F, 1.0F);
 
         IBlockState state = block.getStateFromMeta(0);
-        RendererHelper.renderBakedModel(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, null);
+        RendererHelper.renderBakedModel(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, ItemStack.EMPTY);
 
         GlStateManager.enableLighting();
 

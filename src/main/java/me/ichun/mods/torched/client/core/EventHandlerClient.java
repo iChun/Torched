@@ -11,9 +11,13 @@ import me.ichun.mods.torched.common.item.ItemTorchGun;
 import me.ichun.mods.torched.common.item.ItemTorchLauncher;
 import me.ichun.mods.torched.common.packet.PacketKeyEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -32,8 +36,8 @@ public class EventHandlerClient
         Minecraft mc = Minecraft.getMinecraft();
         if(event.keyBind.keyIndex == mc.gameSettings.keyBindUseItem.getKeyCode() && event.keyBind.isMinecraftBind())
         {
-            ItemStack currentInv = ItemHandler.getUsableDualHandedItem(mc.thePlayer);
-            if(currentInv != null && currentInv.getItem() instanceof ItemTorchGun)
+            ItemStack currentInv = ItemHandler.getUsableDualHandedItem(mc.player);
+            if(currentInv.getItem() instanceof ItemTorchGun)
             {
                 if(event.keyBind.isPressed())
                 {
@@ -54,7 +58,7 @@ public class EventHandlerClient
     public void onWorldTick(TickEvent.ClientTickEvent event)
     {
         Minecraft mc = Minecraft.getMinecraft();
-        if(event.phase == TickEvent.Phase.END && mc.theWorld != null)
+        if(event.phase == TickEvent.Phase.END && mc.world != null)
         {
             if(firing > 0)
             {
@@ -67,27 +71,38 @@ public class EventHandlerClient
     public void onRenderTick(TickEvent.RenderTickEvent event)
     {
         Minecraft mc = Minecraft.getMinecraft();
-        if(mc.theWorld != null)
+        if(mc.world != null)
         {
             if(event.phase == TickEvent.Phase.START)
             {
-                ItemStack currentInv = ItemHandler.getUsableDualHandedItem(mc.thePlayer);
+                ItemStack currentInv = ItemHandler.getUsableDualHandedItem(mc.player);
                 boolean was = currentItemIsTorchGun;
-                currentItemIsTorchGun = currentInv != null && (currentInv.getItem() instanceof ItemTorchGun || currentInv.getItem() instanceof ItemTorchLauncher);
+                currentItemIsTorchGun = (currentInv.getItem() instanceof ItemTorchGun || currentInv.getItem() instanceof ItemTorchLauncher);
                 if(was && !currentItemIsTorchGun)
                 {
                     Torched.channel.sendToServer(new PacketKeyEvent(false));
                 }
-                if(prevCurItem != mc.thePlayer.inventory.currentItem)
+                if(prevCurItem != mc.player.inventory.currentItem)
                 {
-                    if(mc.thePlayer.inventory.currentItem >= 0 && mc.thePlayer.inventory.currentItem <= 9 && mc.entityRenderer.itemRenderer.equippedProgressMainHand >= 1.0F)
+                    if(mc.player.inventory.currentItem >= 0 && mc.player.inventory.currentItem <= 9 && mc.entityRenderer.itemRenderer.equippedProgressMainHand >= 1.0F)
                     {
-                        prevCurItem = mc.thePlayer.inventory.currentItem;
+                        prevCurItem = mc.player.inventory.currentItem;
                     }
                     currentItemIsTorchGun = false;
                 }
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onModelRegistry(ModelRegistryEvent event)
+    {
+        ModelLoader.setCustomModelResourceLocation(Torched.itemTorchGun, 0, new ModelResourceLocation("torched:torchgun", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Torched.itemTorchFirework, 0, new ModelResourceLocation("torched:torchfirework", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Torched.itemTorchFirework, 1, new ModelResourceLocation("torched:torchrpt", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(Torched.itemTorchLauncher, 0, new ModelResourceLocation("torched:torchlauncher", "inventory"));
+
+        ModelBakery.registerItemVariants(Torched.itemTorchFirework, new ResourceLocation("torched", "torchfirework"), new ResourceLocation("torched", "torchrpt"));
     }
 
     public int firing;

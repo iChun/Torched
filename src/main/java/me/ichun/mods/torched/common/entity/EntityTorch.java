@@ -107,7 +107,7 @@ public class EntityTorch extends Entity
 
     public void setThrowableHeading(double par1, double par3, double par5, float par7, float par8)
     {
-        float var9 = MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5);
+        float var9 = MathHelper.sqrt(par1 * par1 + par3 * par3 + par5 * par5);
         par1 /= (double)var9;
         par3 /= (double)var9;
         par5 /= (double)var9;
@@ -120,7 +120,7 @@ public class EntityTorch extends Entity
         this.motionX = par1;
         this.motionY = par3;
         this.motionZ = par5;
-        float var10 = MathHelper.sqrt_double(par1 * par1 + par5 * par5);
+        float var10 = MathHelper.sqrt(par1 * par1 + par5 * par5);
         this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(par1, par5) * 180.0D / Math.PI);
         this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(par3, (double)var10) * 180.0D / Math.PI);
     }
@@ -131,9 +131,9 @@ public class EntityTorch extends Entity
         if(firstUpdate)
         {
             firstUpdate = false;
-            if(worldObj.isRemote && shooter == null && getDataManager().get(SHOOTER_ID) != -1)
+            if(world.isRemote && shooter == null && getDataManager().get(SHOOTER_ID) != -1)
             {
-                Entity ent = worldObj.getEntityByID(getDataManager().get(SHOOTER_ID));
+                Entity ent = world.getEntityByID(getDataManager().get(SHOOTER_ID));
                 if(ent instanceof EntityLivingBase)
                 {
                     shooter = (EntityLivingBase)ent;
@@ -170,24 +170,24 @@ public class EntityTorch extends Entity
 
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
-            float var1 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
             this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
             this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(this.motionY, (double)var1) * 180.0D / Math.PI);
         }
 
         Vec3d var17 = new Vec3d(this.posX, this.posY, this.posZ);
         Vec3d var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-        RayTraceResult mop = this.worldObj.rayTraceBlocks(var17, var3, false, true, false);
+        RayTraceResult mop = this.world.rayTraceBlocks(var17, var3, false, true, false);
         var17 = new Vec3d(this.posX, this.posY, this.posZ);
         var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 
         if (mop != null)
         {
-            var3 = new Vec3d(mop.hitVec.xCoord, mop.hitVec.yCoord, mop.hitVec.zCoord);
+            var3 = new Vec3d(mop.hitVec.x, mop.hitVec.y, mop.hitVec.z);
         }
 
         Entity collidedEnt = null;
-        List var6 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+        List var6 = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1.0D));
         double var7 = 0.0D;
         int var9;
         float var11;
@@ -204,7 +204,7 @@ public class EntityTorch extends Entity
             if (var10.canBeCollidedWith() && (var10 != this.shooter || age >= 6))
             {
                 var11 = 0.3F;
-                AxisAlignedBB var12 = var10.getEntityBoundingBox().expand((double)var11, (double)var11, (double)var11);
+                AxisAlignedBB var12 = var10.getEntityBoundingBox().grow((double)var11);
                 RayTraceResult var13 = var12.calculateIntercept(var17, var3);
 
                 if (var13 != null)
@@ -225,8 +225,8 @@ public class EntityTorch extends Entity
 
         if (collidedEnt != null)
         {
-            var20 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
-            int var23 = MathHelper.ceiling_double_int((double)var20 * this.damage);
+            var20 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+            int var23 = MathHelper.ceil((double)var20 * this.damage);
 
             DamageSource var21 = null;
 
@@ -291,22 +291,22 @@ public class EntityTorch extends Entity
 
         if (mop != null)
         {
-            IBlockState state = this.worldObj.getBlockState(mop.getBlockPos());
+            IBlockState state = this.world.getBlockState(mop.getBlockPos());
             Block bId = state.getBlock();
-            this.motionX = (double)((float)(mop.hitVec.xCoord - this.posX));
-            this.motionY = (double)((float)(mop.hitVec.yCoord - this.posY));
-            this.motionZ = (double)((float)(mop.hitVec.zCoord - this.posZ));
-            var20 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
+            this.motionX = (double)((float)(mop.hitVec.x - this.posX));
+            this.motionY = (double)((float)(mop.hitVec.y - this.posY));
+            this.motionZ = (double)((float)(mop.hitVec.z - this.posZ));
+            var20 = MathHelper.sqrt(this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ);
             this.posX -= this.motionX / (double)var20 * 0.05000000074505806D;
             this.posY -= this.motionY / (double)var20 * 0.05000000074505806D;
             this.posZ -= this.motionZ / (double)var20 * 0.05000000074505806D;
 
-            if (!bId.isAir(state, this.worldObj, mop.getBlockPos()))
+            if (!bId.isAir(state, this.world, mop.getBlockPos()))
             {
-                bId.onEntityCollidedWithBlock(this.worldObj, mop.getBlockPos(), state, this);
+                bId.onEntityCollidedWithBlock(this.world, mop.getBlockPos(), state, this);
             }
 
-            if(!worldObj.isRemote && mop.sideHit == EnumFacing.DOWN)
+            if(!world.isRemote && mop.sideHit == EnumFacing.DOWN)
             {
                 if(ceilingBounce > 0)
                 {
@@ -319,7 +319,7 @@ public class EntityTorch extends Entity
             }
 
             if(mop.sideHit != EnumFacing.DOWN && bId != Blocks.VINE && !(bId instanceof BlockBush)
-                    && (bId.isAir(state, this.worldObj, mop.getBlockPos()) || !bId.isReplaceable(worldObj, mop.getBlockPos()) || bId == Blocks.SNOW_LAYER))
+                    && (bId.isAir(state, this.world, mop.getBlockPos()) || !bId.isReplaceable(world, mop.getBlockPos()) || bId == Blocks.SNOW_LAYER))
             {
                 BlockPos newPos = mop.getBlockPos();
                 if (mop.sideHit == EnumFacing.UP && bId != Blocks.SNOW_LAYER || mop.sideHit != EnumFacing.UP)
@@ -327,12 +327,12 @@ public class EntityTorch extends Entity
                     newPos = newPos.offset(mop.sideHit, 1);
                 }
 
-                if(!worldObj.isRemote)
+                if(!world.isRemote)
                 {
-                    if(worldObj.canBlockBePlaced(Blocks.TORCH, newPos, false, mop.sideHit, this, null))
+                    if(world.mayPlace(Blocks.TORCH, newPos, false, mop.sideHit, this))
                     {
-                        worldObj.setBlockState(newPos, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, mop.sideHit));
-                        worldObj.playSound(null, (double)((float)newPos.getX() + 0.5F), (double)((float)newPos.getY() + 0.5F), (double)((float)newPos.getZ() + 0.5F), Blocks.TORCH.getSoundType().getPlaceSound(), SoundCategory.BLOCKS, (Blocks.TORCH.getSoundType().getVolume() + 1.0F) / 2.0F, Blocks.TORCH.getSoundType().getPitch() * 0.8F);
+                        world.setBlockState(newPos, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, mop.sideHit));
+                        world.playSound(null, (double)((float)newPos.getX() + 0.5F), (double)((float)newPos.getY() + 0.5F), (double)((float)newPos.getZ() + 0.5F), Blocks.TORCH.getSoundType().getPlaceSound(), SoundCategory.BLOCKS, (Blocks.TORCH.getSoundType().getVolume() + 1.0F) / 2.0F, Blocks.TORCH.getSoundType().getPitch() * 0.8F);
                     }
                     else
                     {
@@ -351,7 +351,7 @@ public class EntityTorch extends Entity
         this.posX += this.motionX;
         this.posY += this.motionY;
         this.posZ += this.motionZ;
-        var20 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
+        var20 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
         this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
 
         for (this.rotationPitch = (float)(Math.atan2(this.motionY, (double)var20) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
@@ -384,7 +384,7 @@ public class EntityTorch extends Entity
             for (int var25 = 0; var25 < 4; ++var25)
             {
                 var26 = 0.25F;
-                this.worldObj.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * (double)var26, this.posY - this.motionY * (double)var26, this.posZ - this.motionZ * (double)var26, this.motionX, this.motionY, this.motionZ);
+                this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * (double)var26, this.posY - this.motionY * (double)var26, this.posZ - this.motionZ * (double)var26, this.motionX, this.motionY, this.motionZ);
             }
 
             var22 = 0.8F;
@@ -400,7 +400,7 @@ public class EntityTorch extends Entity
 
     @Override
     @SideOnly(Side.CLIENT)
-    public int getBrightnessForRender(float par1)
+    public int getBrightnessForRender()
     {
         return 15728880;
     }

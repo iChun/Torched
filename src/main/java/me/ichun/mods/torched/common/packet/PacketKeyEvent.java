@@ -30,7 +30,7 @@ public class PacketKeyEvent extends AbstractPacket
     }
 
     @Override
-    public AbstractPacket execute(Side side, EntityPlayer player)
+    public void execute(Side side, EntityPlayer player)
     {
         if(pressed)
         {
@@ -41,7 +41,6 @@ public class PacketKeyEvent extends AbstractPacket
         {
             Torched.eventHandlerServer.playerDelay.remove(player.getName());
         }
-        return null;
     }
 
     @Override
