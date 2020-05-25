@@ -7,7 +7,7 @@
   ],
   "key": {
     "W": {
-      "item": "#plankWood"
+      "tag": "minecraft:planks"
     },
     "I": {
       "item": "minecraft:iron_ingot"
@@ -21,7 +21,7 @@
   },
   "result": {
     "item": "torched:torchgun",
-    "data": 65
+    "nbt": "{Damage:65}"
   }
 }
  

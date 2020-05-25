@@ -1,61 +1,61 @@
 package me.ichun.mods.torched.client.render;
 
-import me.ichun.mods.ichunutil.client.model.item.IModelBase;
-import me.ichun.mods.ichunutil.client.model.item.ModelBaseWrapper;
-import me.ichun.mods.ichunutil.client.render.RendererHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.ichun.mods.ichunutil.client.model.item.IModel;
+import me.ichun.mods.ichunutil.client.render.RenderHelper;
 import me.ichun.mods.torched.client.model.ModelTorchGun;
 import me.ichun.mods.torched.common.Torched;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.block.model.ItemTransformVec3f;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.model.ItemTransformVec3f;
+import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.item.Items;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
 
-import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
 import java.util.Random;
 
 @SuppressWarnings("deprecation")
-public class ItemRenderTorchGun implements IModelBase
+public class ItemRenderTorchGun extends ItemStackTileEntityRenderer
+    implements IModel
 {
+    private static final ResourceLocation TEXTURE = new ResourceLocation("torched", "textures/model/torchgun.png");
+    private static final ItemCameraTransforms ITEM_CAMERA_TRANSFORMS = new ItemCameraTransforms(
+            new ItemTransformVec3f(new Vector3f(0F, -90F, 0F), new Vector3f(-0.025F, 0.0F, 0.075F), new Vector3f(0.5F, 0.5F, 0.5F)),//tp left
+            new ItemTransformVec3f(new Vector3f(0F, 90F, 0F), new Vector3f(-0.025F, 0.0F, 0.075F), new Vector3f(0.5F, 0.5F, 0.5F)),//tp right
+            new ItemTransformVec3f(new Vector3f(0F, -85F, 0F), new Vector3f(0.125F, -0.1F, -0.1F), new Vector3f(0.5F, 0.5F, 0.5F)),//fp left
+            new ItemTransformVec3f(new Vector3f(0F, 85F, 0F), new Vector3f(0.125F, -0.1F, -0.1F), new Vector3f(0.5F, 0.5F, 0.5F)),//fp right
+            new ItemTransformVec3f(new Vector3f(-5F, 90F, 0F), new Vector3f(0F, 0.538F, 0.2F), new Vector3f(0.5F, 0.5F, 0.5F)),//head
+            new ItemTransformVec3f(new Vector3f(30F, 120F, 0F), new Vector3f(0.1F, -0.15F, 0F), new Vector3f(0.35F, 0.35F, 0.35F)),//gui
+            new ItemTransformVec3f(new Vector3f(30F, 120F, 0F), new Vector3f(0F, 0.05F, 0F), new Vector3f(0.15F, 0.15F, 0.15F)),//ground
+            new ItemTransformVec3f(new Vector3f(0F, 0F, 0F), new Vector3f(0F, 0.05F, 0F), new Vector3f(0.15F, 0.15F, 0.15F))//fixed
+    );
+
+    public static final ItemRenderTorchGun INSTANCE = new ItemRenderTorchGun();
+
+    //Stuff to do in relation to getting the current perspective and the current player holding it
+    private ItemCameraTransforms.TransformType currentPerspective;
+    private PlayerEntity lastPlayer;
+
+    //Params
     public ModelTorchGun torchGunModel;
     public Random rand;
     public ItemStack flintSteel;
     public ItemStack powder;
     public ItemStack torch;
-    private ItemStack heldStack;
-    private ItemCameraTransforms.TransformType currentPerspective;
-    public EntityPlayer lastPlayer;
 
-    private static final ResourceLocation texture = new ResourceLocation("torched","textures/model/torchgun.png");
-    private static final ItemCameraTransforms cameraTransforms = new ItemCameraTransforms(
-            new ItemTransformVec3f(new Vector3f(95F, -90F, -60F), new Vector3f(-0.055F, -0.165F, -0.15F), new Vector3f(-1.0F, -1.0F, 1.0F)),//tp left
-            new ItemTransformVec3f(new Vector3f(95F, 90F, 60F), new Vector3f(-0.025F, -0.165F, -0.15F), new Vector3f(-1.0F, -1.0F, 1.0F)),//tp right
-            new ItemTransformVec3f(new Vector3f(5F, -90F, 30F), new Vector3f(-0.1F, -0.1F, -0.1F), new Vector3f(1F, 1F, 1F)),//fp left
-            new ItemTransformVec3f(new Vector3f(5F, 95F, -30F), new Vector3f(0.1F, -0.1F, -0.1F), new Vector3f(1F, 1F, 1F)),//fp right
-            new ItemTransformVec3f(new Vector3f(0F, 0F, 0F), new Vector3f(), new Vector3f(1.0F, 1.0F, 1.0F)),//head
-            new ItemTransformVec3f(new Vector3f(10F, 140F, -10F), new Vector3f(0F, -0.15F, 0F), new Vector3f(0.65F, 0.65F, 0.65F)),//gui
-            new ItemTransformVec3f(new Vector3f(-10F, 140F, -10F), new Vector3f(0F, -0.05F, 0F), new Vector3f(0.3F, 0.3F, 0.3F)),//ground
-            new ItemTransformVec3f(new Vector3f(-10F, 140F, -10F), new Vector3f(0F, -0.05F, 0F), new Vector3f(0.3F, 0.3F, 0.3F))//fixed
-    );
-
-    public ItemRenderTorchGun()
+    private ItemRenderTorchGun()
     {
         torchGunModel = new ModelTorchGun();
         rand = new Random();
@@ -65,202 +65,97 @@ public class ItemRenderTorchGun implements IModelBase
     }
 
     @Override
-    public ResourceLocation getTexture()
+    public void render(ItemStack itemstack, MatrixStack stack, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn)
     {
-        return texture;
-    }
+        setToOrigin(stack);
 
-    @Override
-    public void renderModel(float renderTick)
-    {
-        Minecraft mc = Minecraft.getMinecraft();
-        boolean isFirstPerson = ModelBaseWrapper.isFirstPerson(currentPerspective);
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0.75F, 0.2F, 0.0F);
-        GlStateManager.scale(-0.75F, -0.75F, 0.75F);
-
-        //Torch Render
-        GlStateManager.pushMatrix();
-
-        GlStateManager.rotate(125F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(-20F, 1.0F, 1.0F, 0.0F);
-
-        if(isFirstPerson)
+        Minecraft mc = Minecraft.getInstance();
+        if(lastPlayer != null && lastPlayer == mc.player)
         {
-            GlStateManager.translate(-0.18F, 0.28F, 1.15F);
-        }
-        else
-        {
-            GlStateManager.translate(-0.31F, 0.35F, 1.26F);
-        }
-
-        float scale1 = 0.15F;
-        GlStateManager.scale(scale1, scale1, scale1);
-
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-
-        rand.setSeed(187L);
-
-        float var22 = 0.45F;
-        int count = 64;
-        if(lastPlayer == mc.player && !Minecraft.getMinecraft().player.capabilities.isCreativeMode)
-        {
-            count = 0;
-            NonNullList<ItemStack> stacks = Minecraft.getMinecraft().player.inventory.mainInventory;
-            for(ItemStack is : stacks)
+            int count = 64;
+            if(!lastPlayer.abilities.isCreativeMode)
             {
-                if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH))
+                count = 0;
+                NonNullList<ItemStack> stacks = lastPlayer.inventory.mainInventory;
+                for(ItemStack is : stacks)
                 {
-                    count += is.getCount();
-                    if(count > 64)
+                    if(is.getItem() == Blocks.TORCH.asItem())
                     {
-                        count = 64;
-                        break;
+                        count += is.getCount();
+                        if(count > 64)
+                        {
+                            count = 64;
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        for(int i = 0; i < count; i++)
-        {
-            GlStateManager.pushMatrix();
+            rand.setSeed(lastPlayer.hashCode());
 
-            GlStateManager.rotate(20F, 0.0F, 1.0F, 0.0F);
-            GlStateManager.rotate(-10F, 1.0F, 0.0F, 5F);
-
-            if (i > 0)
+            for(int i = 0; i < count; i++)
             {
-                float var24 = (this.rand.nextFloat() * 2.0F - 1.0F) * 0.15F / var22;
-                float var19 = (this.rand.nextFloat() * 2.0F - 1.0F) * 0.1F / var22;
-                float var20 = (this.rand.nextFloat() * 2.0F - 1.0F) * 0.15F / var22;
-                GlStateManager.translate(var24 - ((float)(i % 8) * 0.13F), var19, var20 - ((float)(i % 8) * 0.15F));
-                if(i == 40 || i == 16)
-                {
-                    GlStateManager.translate(-0.4F, 0.0F, 0.0F);
-                }
+                stack.push();
+
+                stack.translate(-0.9F, -0.05F, 0F);
+
+                float scale = 0.35F;
+                stack.scale(-scale, -scale, scale);
+                double px = rand.nextGaussian() * 0.1F;
+                double py = rand.nextGaussian() * 0.05F;
+                double pz = rand.nextGaussian() * 0.275F;
+                stack.translate(px, py, pz);
+                BlockState state = Blocks.TORCH.getDefaultState();
+                RenderHelper.renderBakedModel(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel(state), RenderTorch.TORCH_STACK, null, stack, bufferIn);
+                stack.pop();
             }
-
-            IBlockState state = Blocks.TORCH.getStateFromMeta(0);
-            RendererHelper.renderBakedModel(mc.getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, torch);
-
-            GlStateManager.popMatrix();
         }
 
-        GlStateManager.popMatrix();
-        //End Torch Render
-
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        GlStateManager.rotate(-6F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(-150F, 0.0F, 0.0F, 1.0F);
-
-        GlStateManager.translate(-0.8F, 0.05F, -0.08F);
-
-        float scale = 0.6F;
-        GlStateManager.scale(scale, scale, scale);
-
-        if(isFirstPerson)
+        if(itemstack.getDamage() < itemstack.getMaxDamage())
         {
-            GlStateManager.translate(0.30F, 0.00F, -0.20F);
-        }
+            stack.push();
 
-        GlStateManager.disableCull();
-        GlStateManager.depthMask(false);
+            stack.translate(-2.3F, -0.25F, 0F);
+            stack.rotate(Vector3f.YP.rotationDegrees(180F));
+            stack.rotate(Vector3f.ZP.rotationDegrees(45F));
 
-        Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
+            float scale = 0.6F;
+            stack.scale(-scale, -scale, 1.25F);
 
-        torchGunModel.render(0.0625F, isFirstPerson, 0);
-
-        if(isFirstPerson)
-        {
-            GlStateManager.enableCull();
-        }
-        GlStateManager.depthMask(true);
-
-        Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
-
-        torchGunModel.render(0.0625F, isFirstPerson, 1);
-
-        GlStateManager.rotate(165F, 0.0F, 0.0F, 1.0F);
-        GlStateManager.rotate(-45F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(-3.5F, 0.0F, 1.0F, 0.0F);
-
-        GlStateManager.translate(1.5F, 0.6F, -1.7F);
-
-        scale = 0.4F;
-        GlStateManager.scale(scale, scale, scale);
-
-        if(heldStack != null && heldStack.getItemDamage() < heldStack.getMaxDamage())
-        {
             ItemStack is = Torched.eventHandlerClient.firing > 0 && lastPlayer == mc.player ? powder : flintSteel;
+            IBakedModel model = Minecraft.getInstance().getItemRenderer().getItemModelMesher().getItemModel(is);
 
-            IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(is);
-            GlStateManager.translate(-0.125F, 0.5F, 0.2F);
-            GlStateManager.rotate(230F, 0F, 1F, 0F);
-            GlStateManager.rotate(50F, 0F, 0F, 1F);
+            RenderHelper.renderBakedModel(model, is, null, stack, bufferIn);
 
-            RendererHelper.renderBakedModel(model, -1, is);
-
-            GlStateManager.translate(0.0F, 0.0F, 0.03F);
-
-            RendererHelper.renderBakedModel(model, -1, is);
-
-            GlStateManager.translate(0.0F, 0.0F, 0.03F);
-
-            RendererHelper.renderBakedModel(model, -1, is);
+            stack.pop();
         }
 
-        GlStateManager.enableLighting();
 
-        GlStateManager.disableBlend();
+        torchGunModel.render(stack, bufferIn.getBuffer(RenderType.getEntityTranslucent(TEXTURE)), combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
 
-        GlStateManager.popMatrix();
-    }
-
-    @Override
-    public void postRender()
-    {
+        //reset these vars. they should be set per render.
         lastPlayer = null;
         currentPerspective = null;
     }
 
     @Override
-    public ModelBase getModel()
-    {
-        return torchGunModel;
-    }
-
-    @Override
     public ItemCameraTransforms getCameraTransforms()
     {
-        return cameraTransforms;
+        return ITEM_CAMERA_TRANSFORMS;
     }
 
     @Override
-    public void handleBlockState(@Nullable IBlockState state, @Nullable EnumFacing side, long rand){}
-
-    @Override
-    public void handleItemState(ItemStack stack, World world, EntityLivingBase entity)
+    public void handleItemState(ItemStack stack, World world, LivingEntity entity)
     {
-        if(entity instanceof EntityPlayer)
+        if(entity instanceof AbstractClientPlayerEntity)
         {
-            lastPlayer = (EntityPlayer)entity;
+            lastPlayer = (AbstractClientPlayerEntity)entity;
         }
-        heldStack = stack;
     }
 
     @Override
-    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, Pair<? extends IBakedModel, Matrix4f> pair)
+    public void handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack mat)
     {
         currentPerspective = cameraTransformType;
-        return pair;
-    }
-
-    @Override
-    public boolean useVanillaCameraTransform()
-    {
-        return true;
     }
 }

@@ -1,27 +1,29 @@
 package me.ichun.mods.torched.common.entity;
 
-import me.ichun.mods.ichunutil.common.core.util.EntityHelper;
-import me.ichun.mods.ichunutil.common.item.ItemHandler;
+import me.ichun.mods.ichunutil.common.entity.util.EntityHelper;
+import me.ichun.mods.ichunutil.common.item.DualHandedItem;
 import me.ichun.mods.torched.common.Torched;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.MoverType;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.entity.*;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class EntityTorchFirework extends Entity
     private static final DataParameter<Integer> SPLIT_COUNT = EntityDataManager.createKey(EntityTorchFirework.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> IS_ROCKET = EntityDataManager.createKey(EntityTorchFirework.class, DataSerializers.BOOLEAN);
 
-    public EntityLivingBase initiator;
+    public LivingEntity initiator;
     public int age;
     public int gunpowderCount;
     public boolean activating;
@@ -45,37 +47,39 @@ public class EntityTorchFirework extends Entity
 
     public int prevTorches;
 
-    public EntityTorchFirework(World par1World)
+    public EntitySize currentSize;
+
+    public EntityTorchFirework(EntityType<?> type, World par1World)
     {
-        super(par1World);
+        super(type, par1World);
         initiator = null;
         age = 0;
         gunpowderCount = 0;
 
         activating = false;
-        setSize(1.0F, 1.0F);
         fuel = 0.0F;
 
         prevTorches = 1;
 
         prevRotationPitch = rotationPitch = -90F;
+
+        currentSize = type.getSize();
     }
 
-    public EntityTorchFirework(World world, int i, int j, int k, boolean isMax)
+    public EntityTorchFirework placed(int i, int j, int k, boolean isMax)
     {
-        this(world);
-        setLocationAndAngles(i + 0.5D, j + 1.001D, k + 0.5D, 0.0F, -90F);
-        rotationYaw = rand.nextInt(4) * 90F;
+        setLocationAndAngles(i + 0.5D, j + 1.001D, k + 0.5D, rand.nextInt(4) * 90F, 90F);
         if(isMax)
         {
             addTorches(511);
             addGP(511);
         }
+
+        return this;
     }
 
-    public EntityTorchFirework(World world, EntityLivingBase living)
+    public EntityTorchFirework shot(LivingEntity living)
     {
-        this(world);
         initiator = living;
         setActive(true);
         addTorches(7);
@@ -85,36 +89,36 @@ public class EntityTorchFirework extends Entity
         fuel = gunpowderCount * 80F;
         setRocket(true);
 
-        setLocationAndAngles(living.posX, living.posY + (double)living.getEyeHeight(), living.posZ, living.rotationYaw, living.rotationPitch);
-        posY -= 0.46000000149011612D;
-        switch(ItemHandler.getHandSide(living, ItemHandler.getUsableDualHandedItem(living)))
+        setLocationAndAngles(living.getPosX(), living.getPosY() + (double)living.getEyeHeight() - 0.46D, living.getPosZ(), living.rotationYaw, living.rotationPitch);
+        double pX = getPosX();
+        double pZ = getPosZ();
+        switch(DualHandedItem.getHandSide(living, DualHandedItem.getUsableDualHandedItem(living)))
         {
             case RIGHT:
             {
-                posX -= (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
-                posZ -= (double)(MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
+                pX -= (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
+                pZ -= (double)(MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
                 break;
             }
             case LEFT:
             {
-                posX += (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
-                posZ += (double)(MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
+                pX += (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
+                pZ += (double)(MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * 0.2F);
                 break;
             }
         }
 
-        setSize(0.9F, 0.9F);
-        setPosition(posX, posY, posZ);
-        motionX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
-        motionZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
-        motionY = (double)(-MathHelper.sin(rotationPitch / 180.0F * (float)Math.PI));
-        setThrowableHeading(motionX, motionY, motionZ, 2F, 5.0F);
+        currentSize = EntitySize.flexible(0.9F, 0.9F);
+        recalculateSize();
+        setPosition(pX, getPosY(), pZ);
+        setThrowableHeading((-MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI)), (-MathHelper.sin(rotationPitch / 180.0F * (float)Math.PI)), (MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI)), 2F, 5.0F);
         prevTorches = 8;
+
+        return this;
     }
 
-    public EntityTorchFirework(World world, double i, double j, double k, float yaw, int torchCount, int gunPowder, EntityTorchFirework firework)
+    public EntityTorchFirework fromExplosion(double i, double j, double k, float yaw, int torchCount, int gunPowder, EntityTorchFirework firework)
     {
-        this(world);
         setLocationAndAngles(i, j, k, yaw, -88F);
         setActive(true);
         addGP(-1);
@@ -132,9 +136,11 @@ public class EntityTorchFirework extends Entity
         double moX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
         double moZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
         double moY = (double)(-MathHelper.sin(rotationPitch / 180.0F * (float)Math.PI));
-        setThrowableHeading(moX, moY, moZ, (float)Math.sqrt(firework.motionX * firework.motionX + firework.motionY * firework.motionY + firework.motionZ * firework.motionZ), 0.0F);
-        motionY = firework.motionY * 0.90D;
+        Vec3d fMo = firework.getMotion();
+        setThrowableHeading(moX, moY, moZ, (float)Math.sqrt(fMo.x * fMo.x + fMo.y * fMo.y + fMo.z * fMo.z), 0.0F);
+        setMotion(getMotion().x, fMo.y * 0.9D, getMotion().z);
 
+        return this;
     }
 
     public void setThrowableHeading(double par1, double par3, double par5, float par7, float par8)
@@ -149,16 +155,19 @@ public class EntityTorchFirework extends Entity
         par1 *= (double)par7;
         par3 *= (double)par7;
         par5 *= (double)par7;
-        this.motionX = par1;
-        this.motionY = par3;
-        this.motionZ = par5;
+        setMotion(par1, par3, par5);
         float var10 = MathHelper.sqrt(par1 * par1 + par5 * par5);
         this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(par1, par5) * 180.0D / Math.PI);
-        this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(par3, (double)var10) * 180.0D / Math.PI);
+        this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(par3, var10) * 180.0D / Math.PI);
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
+    public EntitySize getSize(Pose poseIn) {
+        return currentSize;
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean isInRangeToRenderDist(double par1)
     {
         return par1 < 4096.0D;
@@ -171,7 +180,7 @@ public class EntityTorchFirework extends Entity
     }
 
     @Override
-    protected void entityInit()
+    protected void registerData()
     {
         getDataManager().register(TORCHES, 1);
         getDataManager().register(GUNPOWDER, 1);
@@ -225,7 +234,7 @@ public class EntityTorchFirework extends Entity
         getDataManager().set(SPLIT_COUNT, i);
     }
 
-    public boolean getRocket()
+    public boolean getRocket() //return true if RPT
     {
         return getDataManager().get(IS_ROCKET);
     }
@@ -236,16 +245,16 @@ public class EntityTorchFirework extends Entity
     }
 
     @Override
-    public void onUpdate()
+    public void tick()
     {
-        if(isDead)
+        if(!isAlive())
         {
             return;
         }
-        this.lastTickPosX = this.posX;
-        this.lastTickPosY = this.posY;
-        this.lastTickPosZ = this.posZ;
-        super.onUpdate();
+        this.lastTickPosX = this.getPosX();
+        this.lastTickPosY = this.getPosY();
+        this.lastTickPosZ = this.getPosZ();
+        super.tick();
         if(age == 0)
         {
             prevRotationYaw = rotationYaw;
@@ -256,119 +265,65 @@ public class EntityTorchFirework extends Entity
         {
             if(getGP() <= 0)
             {
-                posY += 0.4F;
-                Torched.proxy.spawnTorchFlame(this);
-                posY -= 0.4F;
+                if(world.isRemote)
+                {
+                    spawnParticle();
+                }
 
                 if(!getRocket())
                 {
-                    this.motionX *= 1.15D;
-                    this.motionZ *= 1.15D;
-                    this.motionY += isSplit ? -0.01D : 0.04D;
+                    Vec3d mo = getMotion();
+                    setMotion(mo.x * 1.15D, mo.y + (isSplit ? -0.01D : 0.04D), mo.z * 1.15D);
                 }
 
-                boolean forceBlow = false;
-
-                if(Math.sqrt(motionX * motionX) > 5D)
-                {
-                    forceBlow = true;
-                }
-                if(Math.sqrt(motionZ * motionZ) > 5D)
-                {
-                    forceBlow = true;
-                }
-
+                Vec3d mo = getMotion();
+                boolean forceBlow = Math.abs(mo.x) > 5D || Math.abs(mo.z) > 5D;
                 if(collidedVertically && world.isRemote)
                 {
-                    motionY = 0.01D;
+                    setMotion(getMotion().x, 0.01D, getMotion().z);
                 }
                 if(getRocket())
                 {
-                    Vec3d var17 = new Vec3d(this.posX, this.posY, this.posZ);
-                    Vec3d var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-                    RayTraceResult mop = this.world.rayTraceBlocks(var17, var3, false, true, false);
-                    var17 = new Vec3d(this.posX, this.posY, this.posZ);
-                    var3 = new Vec3d(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+                    RayTraceResult result = EntityHelper.rayTrace(world, getPositionVec(), getPositionVec().add(getMotion()), this, true, RayTraceContext.BlockMode.COLLIDER, b -> true, RayTraceContext.FluidMode.NONE, e -> !(e instanceof EntityTorch || e instanceof EntityTorchFirework || age < 4 && e == initiator));
 
-                    if (mop != null)
+                    if(result.getType() != RayTraceResult.Type.MISS)
                     {
-                        var3 = new Vec3d(mop.hitVec.x, mop.hitVec.y, mop.hitVec.z);
-                    }
-
-                    Entity collidedEnt = null;
-                    List var6 = this.world.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().expand(this.motionX, this.motionY, this.motionZ).grow(1.0D));
-                    double var7 = 0.0D;
-                    int var9;
-                    float var11;
-
-                    for (var9 = 0; var9 < var6.size(); ++var9)
-                    {
-                        Entity var10 = (Entity)var6.get(var9);
-
-                        if(var10 instanceof EntityTorch || var10 instanceof EntityTorchFirework)
+                        if(result.getType() == RayTraceResult.Type.ENTITY)
                         {
-                            continue;
-                        }
-
-                        if (var10.canBeCollidedWith() && (var10 != initiator || age >= 3))
-                        {
-                            var11 = 0.3F;
-                            AxisAlignedBB var12 = var10.getEntityBoundingBox().grow((double)var11);
-                            RayTraceResult var13 = var12.calculateIntercept(var17, var3);
-
-                            if (var13 != null)
-                            {
-                                double var14 = var17.distanceTo(var13.hitVec);
-
-                                if (var14 < var7 || var7 == 0.0D)
-                                {
-                                    collidedEnt = var10;
-                                    var7 = var14;
-                                }
-                            }
-                        }
-                    }
-
-                    if(mop != null || collidedEnt != null)
-                    {
-                        if(collidedEnt != null)
-                        {
+                            Entity ent = ((EntityRayTraceResult)result).getEntity();
                             DamageSource var21;
                             if (this.initiator == null)
                             {
-                                var21 = (new EntityDamageSourceIndirect("rptRand", this, this)).setProjectile();
+                                var21 = (new IndirectEntityDamageSource("rptRand", this, this)).setProjectile();
                             }
-                            else if(collidedEnt == initiator)
+                            else if(ent == initiator)
                             {
-                                var21 = (new EntityDamageSourceIndirect("rptSelf", this, initiator)).setProjectile();
+                                var21 = (new IndirectEntityDamageSource("rptSelf", this, initiator)).setProjectile();
                             }
                             else
                             {
-                                var21 = (new EntityDamageSourceIndirect("rpt", this, initiator)).setProjectile();
+                                var21 = (new IndirectEntityDamageSource("rpt", this, initiator)).setProjectile();
                             }
-                            collidedEnt.attackEntityFrom(var21, 3);
+                            ent.attackEntityFrom(var21, 3);
                         }
-                        if(mop != null)
+                        else
                         {
-                            posX = mop.hitVec.x - (motionX * 1.05D);
-                            posY = mop.hitVec.y - (motionY * 1.05D);
-                            posZ = mop.hitVec.z - (motionZ * 1.05D);
+                            Vec3d hitVec = result.getHitVec();
+                            mo = getMotion();
+                            setPosition(hitVec.x - (mo.x * 1.05D), hitVec.y - (mo.y * 1.05D), hitVec.z - (mo.z * 1.05D));
                         }
                         forceBlow = true;
                     }
 
-                    this.posX += this.motionX;
-                    this.posY += this.motionY;
-                    this.posZ += this.motionZ;
-
-                    setPosition(posX, posY, posZ);
+                    mo = getMotion();
+                    setPosition(getPosX() + mo.x, getPosY() + mo.y, getPosZ() + mo.z);
                 }
                 else
                 {
-                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                    this.move(MoverType.SELF, getMotion());
                 }
-                float var1 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
+                mo = getMotion();
+                this.rotationYaw = (float)(Math.atan2(mo.x, mo.z) * 180.0D / Math.PI);
 
                 while (this.rotationYaw - this.prevRotationYaw < -180.0F)
                 {
@@ -382,9 +337,9 @@ public class EntityTorchFirework extends Entity
 
                 fuel -= getTorches();
 
-                if(!world.isRemote && (fuel <= 0.0F || isSplit && motionY < -0.1D || forceBlow) && !isDead)
+                if(!world.isRemote && (fuel <= 0.0F || isSplit && mo.y < -0.1D || forceBlow) && isAlive())
                 {
-                    world.createExplosion(initiator, posX, posY, posZ, getRocket() ? 2F : gunpowderCount < 5 ? 0.5F : 3.5F, false);
+                    world.createExplosion(initiator, getPosX(), getPosY(), getPosZ(), getRocket() ? 2F : gunpowderCount < 5 ? 0.5F : 3.5F, Explosion.Mode.NONE);
                     if(getSplits() > 0)
                     {
                         int torch = (int)Math.floor((float)getTorches() / ((float)getSplits() + 1));
@@ -392,7 +347,7 @@ public class EntityTorchFirework extends Entity
                         float splits = getSplits() + 1;
                         for(int i = 0; i <= getSplits() && i < getTorches(); i++)
                         {
-                            world.spawnEntity(new EntityTorchFirework(world, posX, posY + (double)0.2F * ((float)this.getTorches() / 96F), posZ, i * 360F / splits, torch, gunPowder, this));
+                            world.addEntity(new EntityTorchFirework(Torched.EntityTypes.TORCH_FIREWORK.get(), world).fromExplosion(getPosX(), getPosY() + (double)0.2F * ((float)this.getTorches() / 96F), getPosZ(), i * 360F / splits, torch, gunPowder, this));
                         }
                     }
                     else
@@ -401,15 +356,20 @@ public class EntityTorchFirework extends Entity
                         {
                             rotationYaw = world.rand.nextFloat() * 360F;
                             rotationPitch = world.rand.nextFloat() * -85F - 5F;
-                            world.spawnEntity(new EntityTorch(world, this, initiator));
+                            world.addEntity(new EntityTorch(Torched.EntityTypes.TORCH.get(), world).setFirework(this, initiator));
                         }
                     }
-                    setDead();
+                    remove();
                     return;
                 }
 
-                float var20 = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                this.rotationYaw = (float)(Math.atan2(this.motionX, this.motionZ) * 180.0D / Math.PI);
+                mo = getMotion();
+                this.rotationYaw = (float)(Math.atan2(mo.x, mo.z) * 180.0D / Math.PI);
+
+                for (this.rotationPitch = (float)(Math.atan2(mo.y, MathHelper.sqrt(mo.x * mo.x + mo.z * mo.z)) * 180.0D / Math.PI); this.rotationPitch - this.prevRotationPitch < -180.0F; this.prevRotationPitch -= 360.0F)
+                {
+                    ;
+                }
 
                 while (this.rotationPitch - this.prevRotationPitch >= 180.0F)
                 {
@@ -429,15 +389,15 @@ public class EntityTorchFirework extends Entity
                 this.rotationPitch = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * 0.2F;
                 this.rotationYaw = this.prevRotationYaw + (this.rotationYaw - this.prevRotationYaw) * 0.2F;
             }
-            else if(!world.isRemote && world.getWorldTime() % 2L == 0 && activating)
+            else if(!world.isRemote && this.ticksExisted % 2L == 0 && activating)
             {
-                int minus = (int)Math.ceil((getGP() / 100) + 1);
+                int minus = (int)Math.ceil((getGP() / 100F) + 1);
                 addGP(-minus);
                 gunpowderCount += minus;
                 if(getGP() <= 0)
                 {
                     setActive(true);
-                    EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                    EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
                     fuel = gunpowderCount * 140F;
                 } //256 torches and 96 gunpowder
             }
@@ -449,56 +409,50 @@ public class EntityTorchFirework extends Entity
                 fuel = gunpowderCount * 140F;
                 addGP(-getGP());
                 setActive(true);
-                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
         }
-        else if(!world.isRemote && world.getWorldTime() % 2L == 0)
+        else if(!world.isRemote && this.ticksExisted % 2L == 0)
         {
-            List list = world.getEntitiesWithinAABBExcludingEntity(this, getEntityBoundingBox().grow(0.0D, 0.2D, 0.0D));
+            List<Entity> list = world.getEntitiesInAABBexcluding(this, getBoundingBox().grow(0.0D, 0.2D, 0.0D), e -> e instanceof ItemEntity);
             for(int i = 0; i < list.size(); i++)
             {
-                Entity ent = (Entity)list.get(i);
-                if(!(ent instanceof EntityItem))
+                Entity ent = list.get(i);
+                ItemEntity item = (ItemEntity)ent;
+                item.getItem();
+                if(item.getItem().getItem() == Blocks.TORCH.asItem())
                 {
-                    continue;
-                }
-
-                EntityItem item = (EntityItem)ent;
-                if(item.getItem() != null)
-                {
-                    if(item.getItem().getItem() == Item.getItemFromBlock(Blocks.TORCH))
+                    if(getTorches() + item.getItem().getCount() <= 512)
                     {
-                        if(getTorches() + item.getItem().getCount() <= 512)
-                        {
-                            addTorches(item.getItem().getCount());
-                            item.setDead();
-                        }
-                        else if(getTorches() < 512)
-                        {
-                            addTorches((getTorches() + item.getItem().getCount()) - 512);
-                            item.getItem().shrink(((getTorches() + item.getItem().getCount()) - 512));
-                        }
+                        addTorches(item.getItem().getCount());
+                        item.remove();
                     }
-                    else if(item.getItem().getItem() == Items.GUNPOWDER)
+                    else if(getTorches() < 512)
                     {
-                        if(getGP() + item.getItem().getCount() <= 512)
-                        {
-                            addGP(item.getItem().getCount());
-                            item.setDead();
-                        }
-                        else if(getGP() < 512)
-                        {
-                            addGP((getGP() + item.getItem().getCount()) - 512);
-                            item.getItem().shrink((getGP() + item.getItem().getCount()) - 512);;
-                        }
+                        addTorches((getTorches() + item.getItem().getCount()) - 512);
+                        item.getItem().shrink(((getTorches() + item.getItem().getCount()) - 512));
+                    }
+                }
+                else if(item.getItem().getItem() == Items.GUNPOWDER)
+                {
+                    if(getGP() + item.getItem().getCount() <= 512)
+                    {
+                        addGP(item.getItem().getCount());
+                        item.remove();
+                    }
+                    else if(getGP() < 512)
+                    {
+                        addGP((getGP() + item.getItem().getCount()) - 512);
+                        item.getItem().shrink((getGP() + item.getItem().getCount()) - 512);;
                     }
                 }
             }
-            if(world.getBlockState(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))).getBlock() == Blocks.FIRE)
+            BlockPos thisPos = new BlockPos(this);
+            if(world.getBlockState(thisPos).getBlock() == Blocks.FIRE)
             {
                 setFire(8);
             }
-            else if(world.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY), (int)Math.floor(posZ))) || world.isBlockPowered(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY) - 1, (int)Math.floor(posZ))))
+            else if(world.isBlockPowered(thisPos) || world.isBlockPowered(new BlockPos(thisPos.add(0, -1, 0))))
             {
                 extinguish();
                 activating = true;
@@ -506,9 +460,9 @@ public class EntityTorchFirework extends Entity
                 fuel = gunpowderCount * 140F;
                 addGP(-getGP());
                 setActive(true);
-                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
-            else if(!world.isSideSolid(new BlockPos((int)Math.floor(posX), (int)Math.floor(posY - 1), (int)Math.floor(posZ)), EnumFacing.getFront(1), true))
+            else if(!world.getBlockState(thisPos.add(0, -1, 0)).isSolidSide(world, thisPos.add(0, -1, 0), Direction.UP))
             {
                 this.attackEntityFrom(DamageSource.GENERIC, 1);
             }
@@ -516,26 +470,33 @@ public class EntityTorchFirework extends Entity
         }
         else
         {
-            prevRotationPitch = rotationPitch = -90F;
+            prevRotationPitch = rotationPitch = 90F;
         }
         if(prevTorches != getTorches())
         {
             prevTorches = getTorches();
-            setSize(1.0F, 1.0F + ((float) getTorches() / 192F));
-            setPosition(posX, posY, posZ);
+            currentSize = EntitySize.flexible(1.0F, 1.0F + ((float) getTorches() / 192F));
+            recalculateSize();
+            setPosition(getPosX(), getPosY(), getPosZ());
         }
-        //		setDead();
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public int getBrightnessForRender()
+    @OnlyIn(Dist.CLIENT)
+    public void spawnParticle()
     {
-        return 15728880;
+        Vec3d mo = getMotion();
+        double particleSpeed = 0.75D;
+        float scale = 1.0F + (this.getRocket() ? 1.0F : this.getTorches() / 96F);
+
+        Particle particle = Minecraft.getInstance().worldRenderer.addParticleUnchecked(Torched.Particles.FLAME.get(), true, this.getPosX() - mo.x * 0.3D, this.getPosY() - mo.y * 0.3D + 0.4D, this.getPosZ() - mo.z * 0.3D, mo.x * particleSpeed, mo.y * particleSpeed, mo.z * particleSpeed);
+        if(particle != null)
+        {
+            particle.multipleParticleScaleBy(scale);
+        }
     }
 
     @Override
-    public boolean processInitialInteract(EntityPlayer player, EnumHand hand)
+    public boolean processInitialInteract(PlayerEntity player, Hand hand)
     {
         if(!world.isRemote && !activating)
         {
@@ -543,7 +504,7 @@ public class EntityTorchFirework extends Entity
             if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH) && getTorches() < 512)
             {
                 addTorches(1);
-                if(!player.capabilities.isCreativeMode)
+                if(!player.abilities.isCreativeMode)
                 {
                     is.shrink(1);
                     if(is.isEmpty())
@@ -557,7 +518,7 @@ public class EntityTorchFirework extends Entity
             else if(is.getItem() == Items.GUNPOWDER && getGP() < 512)
             {
                 addGP(1);
-                if(!player.capabilities.isCreativeMode)
+                if(!player.abilities.isCreativeMode)
                 {
                     is.shrink(1);
                     if(is.isEmpty())
@@ -571,9 +532,9 @@ public class EntityTorchFirework extends Entity
             else if(is.getItem() == Items.FLINT_AND_STEEL)
             {
                 activating = true;
-                if(!player.capabilities.isCreativeMode)
+                if(!player.abilities.isCreativeMode)
                 {
-                    is.setItemDamage(is.getItemDamage() + 1);
+                    is.setDamage(is.getDamage() + 1);
                 }
                 initiator = player;
                 player.swingArm(hand);
@@ -582,7 +543,7 @@ public class EntityTorchFirework extends Entity
             else if(is.getItem() == Items.GOLD_NUGGET && getSplits() < 16)
             {
                 addSplit();
-                if(!player.capabilities.isCreativeMode)
+                if(!player.abilities.isCreativeMode)
                 {
                     is.shrink(1);
                     if(is.isEmpty())
@@ -616,13 +577,13 @@ public class EntityTorchFirework extends Entity
             {
                 while(getTorches() > 0)
                 {
-                    int count = getTorches() > 64 ? 64 : getTorches();
+                    int count = Math.min(getTorches(), 64);
                     entityDropItem(new ItemStack(Blocks.TORCH, count), 0.5F);
                     addTorches(-count);
                 }
                 while(getGP() > 0)
                 {
-                    int count = getGP() > 64 ? 64 : getGP();
+                    int count = Math.min(getGP(), 64);
                     entityDropItem(new ItemStack(Items.GUNPOWDER, count), 0.5F);
                     addGP(-count);
                 }
@@ -630,7 +591,7 @@ public class EntityTorchFirework extends Entity
                 {
                     entityDropItem(new ItemStack(Items.GOLD_NUGGET, 1), 0.5F);
                 }
-                setDead();
+                remove();
             }
             return true;
         }
@@ -640,39 +601,45 @@ public class EntityTorchFirework extends Entity
     @Override
     public ItemStack getPickedResult(RayTraceResult target)
     {
-        return new ItemStack(Torched.itemTorchFirework, 1);
+        return new ItemStack(Torched.Items.TORCH_FIREWORK.get());
     }
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound tag)
+    protected void readAdditional(CompoundNBT tag)
     {
-        age = tag.getInteger("age");
-        addTorches(tag.getInteger("torchCount") - 1);
-        addGP(tag.getInteger("gpCount") - 1);
+        age = tag.getInt("age");
+        addTorches(tag.getInt("torchCount") - 1);
+        addGP(tag.getInt("gpCount") - 1);
         setActive(tag.getBoolean("active"));
         activating = tag.getBoolean("activating");
-        gunpowderCount = tag.getInteger("gunpowderCount");
+        gunpowderCount = tag.getInt("gunpowderCount");
         fuel = tag.getFloat("fuel");
-        setSplits(tag.getInteger("splits"));
+        setSplits(tag.getInt("splits"));
 
         isSplit = tag.getBoolean("isSplit");
-        xOrigin = tag.getInteger("xOrigin");
-        zOrigin = tag.getInteger("zOrigin");
+        xOrigin = tag.getInt("xOrigin");
+        zOrigin = tag.getInt("zOrigin");
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound tag)
+    protected void writeAdditional(CompoundNBT tag)
     {
-        tag.setInteger("age", age);
-        tag.setInteger("torchCount", getTorches());
-        tag.setInteger("gpCount", getGP());
-        tag.setBoolean("active", getActive());
-        tag.setBoolean("activating", activating);
-        tag.setInteger("gunpowderCount", gunpowderCount);
-        tag.setFloat("fuel", fuel);
-        tag.setInteger("splits", getSplits());
-        tag.setBoolean("isSplit", isSplit);
-        tag.setInteger("xOrigin", xOrigin);
-        tag.setInteger("zOrigin", zOrigin);
+        tag.putInt("age", age);
+        tag.putInt("torchCount", getTorches());
+        tag.putInt("gpCount", getGP());
+        tag.putBoolean("active", getActive());
+        tag.putBoolean("activating", activating);
+        tag.putInt("gunpowderCount", gunpowderCount);
+        tag.putFloat("fuel", fuel);
+        tag.putInt("splits", getSplits());
+        tag.putBoolean("isSplit", isSplit);
+        tag.putInt("xOrigin", xOrigin);
+        tag.putInt("zOrigin", zOrigin);
+    }
+
+    @Override
+    public IPacket<?> createSpawnPacket()
+    {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

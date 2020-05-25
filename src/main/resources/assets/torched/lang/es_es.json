@@ -1,0 +1,16 @@
+{
+  "death.attack.torched": "%1$s ha sido herido por una antorcha de %2$s",
+  "death.attack.torchedSelf": "%1$s se ha herido con una antorcha",
+  "death.attack.torchedRand": "%1$s ha sido herido por una antorcha perdida",
+  "death.attack.torchedFire": "%2$s lanzó fuego sobre %1$s",
+  "death.attack.torchedFireSelf": "%1$s lanzó fuego sobre si mismo",
+
+  "death.attack.rpt": "%2$s lanzó una antorcha propulsada a %1$s",
+  "death.attack.rptSelf": "%1$s se ha herido con una antorcha propulsada lanzada por si mismo",
+  "death.attack.rptRand": "%1$s ha sido herido con una antorcha propulada",
+
+  "item.torched.torchgun": "Pistola de Antorchas",
+  "item.torched.torchfirework": "Cohete de Antorchas",
+  "item.torched.torchrocket": "Antorcha Propulsada",
+  "item.torched.torchlauncher": "Bazooka de Antorchas"
+}

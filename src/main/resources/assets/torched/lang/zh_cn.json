@@ -1,0 +1,16 @@
+{
+  "death.attack.torched": "%1$s被%2$s的火把砸到了.",
+  "death.attack.torchedSelf": "%1$s拿火把砸倒了自己.",
+  "death.attack.torchedRand": "%1$s被天降而来的火把砸倒在地.",
+  "death.attack.torchedFire": "%1$s被%2$s召唤来的火雨砸倒在地.",
+  "death.attack.torchedFireSelf": "%1$s召唤火雨砸倒了自己.",
+
+  "death.attack.rpt": "%2$s朝着%1$s发射了火箭助推火把.",
+  "death.attack.rptSelf": "%1$s朝着自己发射了火箭助推火把.",
+  "death.attack.rptRand": "%1$s迎面撞上了火箭助推火把.",
+
+  "item.torched.torchgun": "火把枪",
+  "item.torched.torchfirework": "火把火箭",
+  "item.torched.torchrocket": "火箭助推火把",
+  "item.torched.torchlauncher": "火箭助推火把发射器"
+}

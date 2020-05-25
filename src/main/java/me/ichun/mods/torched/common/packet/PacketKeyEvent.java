@@ -1,10 +1,10 @@
 package me.ichun.mods.torched.common.packet;
 
-import io.netty.buffer.ByteBuf;
-import me.ichun.mods.ichunutil.common.core.network.AbstractPacket;
+import me.ichun.mods.ichunutil.common.network.AbstractPacket;
 import me.ichun.mods.torched.common.Torched;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 public class PacketKeyEvent extends AbstractPacket
 {
@@ -18,34 +18,32 @@ public class PacketKeyEvent extends AbstractPacket
     }
 
     @Override
-    public void writeTo(ByteBuf buffer)
+    public void writeTo(PacketBuffer buffer)
     {
         buffer.writeBoolean(pressed);
     }
 
     @Override
-    public void readFrom(ByteBuf buffer)
+    public void readFrom(PacketBuffer buffer)
     {
         pressed = buffer.readBoolean();
     }
 
     @Override
-    public void execute(Side side, EntityPlayer player)
+    public void process(NetworkEvent.Context context) //receivingSide = SERVER
     {
-        if(pressed)
-        {
-            Torched.eventHandlerServer.playerDelay.put(player.getName(), 0);
-            Torched.eventHandlerServer.shootTorch(player);
-        }
-        else
-        {
-            Torched.eventHandlerServer.playerDelay.remove(player.getName());
-        }
-    }
+        context.enqueueWork(() -> {
+            ServerPlayerEntity player = context.getSender();
+            if(pressed)
+            {
+                Torched.eventHandlerServer.playerDelay.put(player.getName().getUnformattedComponentText(), 0);
+                Torched.eventHandlerServer.shootTorch(player);
+            }
+            else
+            {
+                Torched.eventHandlerServer.playerDelay.remove(player.getName().getUnformattedComponentText());
+            }
 
-    @Override
-    public Side receivingSide()
-    {
-        return Side.SERVER;
+        });
     }
 }

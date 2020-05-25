@@ -1,0 +1,16 @@
+{
+  "death.attack.torched": "%1$s blev ramt af en fakkel fra %2$s",
+  "death.attack.torchedSelf": "%1$s ramte sigselv med en fakkel",
+  "death.attack.torchedRand": "%1$s blev ramt af en tilfædldig faldene fakkel",
+  "death.attack.torchedFire": "%2$s regnede Ild på %1$s",
+  "death.attack.torchedFireSelf": "%1$s regnede Ild på sigselv",
+
+  "death.attack.rpt": "%2$s skød en raket fremdrævet af en fakkel mod %1$s",
+  "death.attack.rptSelf": "%1$s ramte sigselv med en raket fræmdrævet af en fakkel",
+  "death.attack.rptRand": "%1$s var ramt af en raket fremdrævet af en fakkel",
+
+  "item.torched.torchgun": "Fakkel Riffel",
+  "item.torched.torchfirework": "Fakkel Raket",
+  "item.torched.torchrocket": "Raket Fræmdrevet af en fakel",
+  "item.torched.torchlauncher": "RPT Launcher"
+}

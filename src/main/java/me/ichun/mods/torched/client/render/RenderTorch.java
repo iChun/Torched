@@ -1,58 +1,58 @@
 package me.ichun.mods.torched.client.render;
 
-import me.ichun.mods.ichunutil.client.render.RendererHelper;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import me.ichun.mods.ichunutil.client.render.RenderHelper;
 import me.ichun.mods.torched.common.entity.EntityTorch;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.init.Blocks;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderState;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
-public class RenderTorch extends Render<EntityTorch>
+public class RenderTorch extends EntityRenderer<EntityTorch>
 {
-    public RenderTorch(RenderManager manager)
+    public static final RenderType RENDER_TYPE = RenderType.makeType("entity_cutout_no_lighting", DefaultVertexFormats.ENTITY, 7, 256, true, false, RenderType.State.getBuilder().texture(new RenderState.TextureState(AtlasTexture.LOCATION_BLOCKS_TEXTURE, false, false)).transparency(RenderState.NO_TRANSPARENCY).alpha(RenderState.DEFAULT_ALPHA).overlay(RenderState.OVERLAY_ENABLED).build(true));
+    public static final ItemStack TORCH_STACK = new ItemStack(Blocks.TORCH.asItem());
+
+    public RenderTorch(EntityRendererManager manager)
     {
         super(manager);
     }
 
     @Override
-    public void doRender(EntityTorch torch, double d, double d1, double d2, float f, float f1)
+    public void render(EntityTorch torch, float entityYaw, float partialTicks, MatrixStack stack, IRenderTypeBuffer bufferIn, int packedLightIn)
     {
-        Block block = Blocks.TORCH;
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(d, d1, d2);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        bindEntityTexture(torch);
-        GlStateManager.disableLighting();
-        GlStateManager.rotate(torch.prevRotationYaw + (torch.rotationYaw - torch.prevRotationYaw) * f1 - 90F, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotate(90F + torch.prevRotationPitch + (torch.rotationPitch - torch.prevRotationPitch) * f1, 0.0F, 0.0F, 1.0F);
+        stack.rotate(Vector3f.YP.rotationDegrees(torch.prevRotationYaw + (torch.rotationYaw - torch.prevRotationYaw) * partialTicks - 90F));
+        stack.rotate(Vector3f.ZP.rotationDegrees(90F + torch.prevRotationPitch + (torch.rotationPitch - torch.prevRotationPitch) * partialTicks));
 
-        IBlockState state = block.getStateFromMeta(0);
-        RendererHelper.renderBakedModel(Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getModelForState(state), -1, ItemStack.EMPTY);
-
-        GlStateManager.enableLighting();
-
-        GlStateManager.popMatrix();
-        GlStateManager.disableRescaleNormal();
+        BlockState state = Blocks.TORCH.getDefaultState();
+        RenderHelper.renderBakedModel(Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes().getModel(state), TORCH_STACK, RENDER_TYPE, stack, bufferIn);
     }
 
     @Override
-    protected ResourceLocation getEntityTexture(EntityTorch par1Entity)
+    protected int getBlockLight(EntityTorch entityIn, float partialTicks) {
+        return 15;
+    }
+
+    @Override
+    public ResourceLocation getEntityTexture(EntityTorch par1Entity)
     {
-        return TextureMap.LOCATION_BLOCKS_TEXTURE;
+        return AtlasTexture.LOCATION_BLOCKS_TEXTURE;
     }
 
     public static class RenderFactory implements IRenderFactory<EntityTorch>
     {
         @Override
-        public Render<? super EntityTorch> createRenderFor(RenderManager manager)
+        public EntityRenderer<? super EntityTorch> createRenderFor(EntityRendererManager manager)
         {
             return new RenderTorch(manager);
         }

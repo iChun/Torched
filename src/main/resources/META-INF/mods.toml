@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[31,)" #forge version dep
+issueTrackerURL="https://github.com/iChun/Torched/issues"
+
+[[mods]]
+    modId="torched"
+    version="${file.jarVersion}" #mandatory
+    displayName="Torched"
+    displayURL="https://ichun.me/mods/torched/"
+    authors="iChun"
+    description='''
+    Adds a couple of items which aids with torch placement. Mainly a gun, rocket, and launcher.
+    '''
+
+[[dependencies.torched]]
+    modId="forge"
+    mandatory=true
+    versionRange="[31,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.torched]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2,1.16)"
+    ordering="NONE"
+    side="BOTH"

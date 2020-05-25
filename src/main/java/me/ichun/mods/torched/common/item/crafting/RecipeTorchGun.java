@@ -1,76 +1,66 @@
 package me.ichun.mods.torched.common.item.crafting;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import me.ichun.mods.torched.common.Torched;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.util.NonNullList;
+import net.minecraft.item.Items;
+import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.IRecipeFactory;
-import net.minecraftforge.common.crafting.JsonContext;
 
-public class RecipeTorchGun extends ShapelessRecipes
+public class RecipeTorchGun extends SpecialRecipe
 {
     private ItemStack output = ItemStack.EMPTY;
 
-    public RecipeTorchGun(String group, ItemStack output, NonNullList<Ingredient> ingredients)
+    public RecipeTorchGun(ResourceLocation name)
     {
-        super(group, output, ingredients);
+        super(name);
     }
 
     @Override
-    public boolean matches(InventoryCrafting var1, World var2)
+    public boolean matches(CraftingInventory var1, World var2)
     {
         output = ItemStack.EMPTY;
 
         ItemStack gun = null;
         ItemStack fs = null;
 
-        for (int var4 = 0; var4 < 3; ++var4)
+        for(int j = 0; j < var1.getSizeInventory(); ++j)
         {
-            for (int var5 = 0; var5 < 3; ++var5)
+            ItemStack var6 = var1.getStackInSlot(j);
+            if(var6.getItem() == Items.FLINT_AND_STEEL)
             {
-                ItemStack var6 = var1.getStackInRowAndColumn(var5, var4);
-                if(var6.getItem() == Items.FLINT_AND_STEEL)
+                if(fs == null)
                 {
-                    if(fs == null)
-                    {
-                        fs = var6;
-                    }
-                    else
+                    fs = var6;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if(var6.getItem() == Torched.Items.TORCH_GUN.get())
+            {
+                if(gun == null)
+                {
+                    gun = var6;
+                    if(gun.getDamage() == 1)
                     {
                         return false;
                     }
                 }
-                else if(var6.getItem() == Torched.itemTorchGun)
+                else
                 {
-                    if(gun == null)
-                    {
-                        gun = var6;
-                        if(gun.getItemDamage() == 1)
-                        {
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
         }
+
         if(gun != null && fs != null)
         {
-            int dmg = fs.getItemDamage();
-            if(gun.getItemDamage() <= fs.getItemDamage())
+            int dmg = fs.getDamage();
+            if(gun.getDamage() <= fs.getDamage())
             {
                 return false;
             }
@@ -78,7 +68,8 @@ public class RecipeTorchGun extends ShapelessRecipes
             {
                 dmg = 1;
             }
-            output = new ItemStack(Torched.itemTorchGun, 1, dmg);
+            output = new ItemStack(Torched.Items.TORCH_GUN.get());
+            output.setDamage(dmg);
             return true;
         }
 
@@ -86,9 +77,15 @@ public class RecipeTorchGun extends ShapelessRecipes
     }
 
     @Override
-    public ItemStack getCraftingResult(InventoryCrafting var1)
+    public ItemStack getCraftingResult(CraftingInventory var1)
     {
         return output.copy();
+    }
+
+    @Override
+    public boolean canFit(int width, int height)
+    {
+        return width * height >= 2;
     }
 
     @Override
@@ -97,24 +94,9 @@ public class RecipeTorchGun extends ShapelessRecipes
         return output;
     }
 
-    public static class Factory implements IRecipeFactory
+    @Override
+    public IRecipeSerializer<?> getSerializer()
     {
-        @Override
-        public IRecipe parse(JsonContext context, JsonObject json)
-        {
-            String group = JsonUtils.getString(json, "group", "");
-
-            NonNullList<Ingredient> ings = NonNullList.create();
-            for(JsonElement ele : JsonUtils.getJsonArray(json, "ingredients"))
-                ings.add(CraftingHelper.getIngredient(ele, context));
-
-            if(ings.isEmpty())
-                throw new JsonParseException("No ingredients for shapeless recipe");
-            if(ings.size() > 9)
-                throw new JsonParseException("Too many ingredients for shapeless recipe");
-
-            ItemStack itemstack = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
-            return new RecipeTorchGun(group, itemstack, ings);
-        }
+        return null;
     }
 }

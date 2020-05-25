@@ -1,10 +1,12 @@
 package me.ichun.mods.torched.client.model;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.entity.Entity;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class ModelTorchLauncher extends ModelBase
+public class ModelTorchLauncher extends Model
 {
 	//fields
 	public ModelRenderer handle;
@@ -33,6 +35,8 @@ public class ModelTorchLauncher extends ModelBase
 
 	public ModelTorchLauncher()
 	{
+		super(RenderType::getEntityTranslucentCull);
+
 		textureWidth = 256;
 		textureHeight = 256;
 
@@ -130,32 +134,34 @@ public class ModelTorchLauncher extends ModelBase
 		setRotation(baselauncher, 0F, 0F, 0F);
 	}
 
-	public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5)
+	@Override
+	public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
 	{
-		handle.render(f5);
-		barrel9.render(f5);
-		barrel10.render(f5);
-		barrel11.render(f5);
-		barrel12.render(f5);
-		barrel13.render(f5);
-		barrel14.render(f5);
-		barrel15.render(f5);
-		barrel16.render(f5);
-		barrel1.render(f5);
-		barrel8.render(f5);
-		barrel7.render(f5);
-		barrel2.render(f5);
-		barrel3.render(f5);
-		barrel6.render(f5);
-		barrel4.render(f5);
-		barrel5.render(f5);
-		
-		backright.render(f5);
-		backmiddle.render(f5);
-		backbottom.render(f5);
-		backtop.render(f5);
-		backleft.render(f5);
-		baselauncher.render(f5);
+		handle.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel9.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel10.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel11.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel12.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel13.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel14.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel15.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel16.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel1.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel8.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel7.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel2.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel3.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel6.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel4.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel5.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+
+		backright.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		backmiddle.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		backbottom.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		backtop.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		backleft.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		baselauncher.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z)
@@ -164,10 +170,4 @@ public class ModelTorchLauncher extends ModelBase
 		model.rotateAngleY = y;
 		model.rotateAngleZ = z;
 	}
-
-	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity ent)
-	{
-		super.setRotationAngles(f, f1, f2, f3, f4, f5, ent);
-	}
-
 }

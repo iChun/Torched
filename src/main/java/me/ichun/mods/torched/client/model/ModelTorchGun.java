@@ -1,10 +1,12 @@
 package me.ichun.mods.torched.client.model;
 
-import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.entity.Entity;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.model.Model;
+import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class ModelTorchGun extends ModelBase
+public class ModelTorchGun extends Model
 {
 	public ModelRenderer main;
 	public ModelRenderer grip;
@@ -33,6 +35,8 @@ public class ModelTorchGun extends ModelBase
 
 	public ModelTorchGun()
 	{
+		super(RenderType::getEntityTranslucentCull);
+
 		textureWidth = 256;
 		textureHeight = 128;
 
@@ -157,35 +161,35 @@ public class ModelTorchGun extends ModelBase
 		setRotation(Holdertingleft, 0F, 0F, -0.1396263F);
 	}
 
-	public void render(float f5, boolean firstPerson, int pass)
+	@Override
+	public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
 	{
-		if(pass > 0)
-		{
-			main.render(f5);
-			grip.render(f5);
-			stock2.render(f5);
-			Holderright.render(f5);
-			sightright.render(f5);
-			handle.render(f5);
-			stock1.render(f5);
-			stock3.render(f5);
-			stock4.render(f5);
-			Rail.render(f5);
-			Ironsightleft.render(f5);
-			sighttop.render(f5);
-			sightleft.render(f5);
-			sightbottom.render(f5);
-			sightattachment.render(f5);
-			ironsightmiddle.render(f5);
-			ironsightright.render(f5);
-			ironsightbottom.render(f5);
-			barrel.render(f5);
-			holderthingright.render(f5);
-			Holderleft.render(f5);
-			Holdertingleft.render(f5);
-		}
+		MagL.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha); //first pass
 		
-		MagL.render(f5);
+
+		//rest of gun
+		main.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		grip.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		stock2.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		Holderright.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		sightright.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		handle.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		stock1.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		stock3.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		stock4.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		Rail.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		Ironsightleft.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		sighttop.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		sightleft.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		sightbottom.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		sightattachment.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		ironsightmiddle.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		ironsightright.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		ironsightbottom.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		barrel.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		holderthingright.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		Holderleft.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+		Holdertingleft.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z)
@@ -194,11 +198,4 @@ public class ModelTorchGun extends ModelBase
 		model.rotateAngleY = y;
 		model.rotateAngleZ = z;
 	}
-
-	@Override
-	public void setRotationAngles(float f, float f1, float f2, float f3, float f4, float f5, Entity ent)
-	{
-		super.setRotationAngles(f, f1, f2, f3, f4, f5, ent);
-	}
-
 }

@@ -1,70 +1,62 @@
 package me.ichun.mods.torched.common.item;
 
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
+import me.ichun.mods.ichunutil.common.item.DualHandedItem;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumAction;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.*;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.*;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class ItemTorchGun extends Item
+        implements DualHandedItem
 {
-    public ItemTorchGun()
+    public ItemTorchGun(Properties properties)
     {
-        maxStackSize = 1;
-        setMaxDamage(65);
+        super(properties);
     }
 
     @Override
-    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player)
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, PlayerEntity player)
     {
         return false;
     }
 
     @Override
-    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity)
+    public boolean onLeftClickEntity(ItemStack stack, PlayerEntity player, Entity entity)
     {
         return false;
     }
 
     @Override
-    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand)
+    public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context)
     {
-        return EnumActionResult.FAIL;
+        return ActionResultType.FAIL;
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
-    {
-        if (this.isInCreativeTab(tab))
-        {
-            items.add(new ItemStack(this, 1, 1));
+    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+        if (this.isInGroup(group)) {
+            ItemStack is = new ItemStack(this);
+            is.setDamage(1);
+            items.add(is);
         }
     }
 
     @Override
     public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
     {
-        return slotChanged || !ItemStack.areItemStacksEqual(oldStack, newStack);
+        return slotChanged;// || !ItemStack.areItemStacksEqual(oldStack, newStack);
     }
 
     @Override
-    public EnumAction getItemUseAction(ItemStack par1ItemStack)
+    public UseAction getUseAction(ItemStack stack)
     {
-        return EnumAction.BOW;
+        return UseAction.BOW;
     }
 
     @Override
-    public int getMaxItemUseDuration(ItemStack stack)
+    public int getUseDuration(ItemStack stack)
     {
         return Integer.MAX_VALUE;
     }

@@ -1,26 +1,18 @@
 package me.ichun.mods.torched.common.core;
 
-import me.ichun.mods.ichunutil.common.core.util.EntityHelper;
-import me.ichun.mods.ichunutil.common.item.ItemHandler;
+import me.ichun.mods.ichunutil.common.entity.util.EntityHelper;
+import me.ichun.mods.ichunutil.common.item.DualHandedItem;
 import me.ichun.mods.torched.common.Torched;
 import me.ichun.mods.torched.common.entity.EntityTorch;
-import me.ichun.mods.torched.common.item.ItemTorchFirework;
 import me.ichun.mods.torched.common.item.ItemTorchGun;
-import me.ichun.mods.torched.common.item.ItemTorchLauncher;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,7 +23,7 @@ public class EventHandlerServer
     @SubscribeEvent
     public void onInteract(PlayerInteractEvent.EntityInteract event)
     {
-        if(event.getEntityPlayer().getActiveItemStack().getItem() instanceof ItemTorchGun)
+        if(event.getPlayer().getActiveItemStack().getItem() instanceof ItemTorchGun)
         {
             event.setCanceled(true);
         }
@@ -50,7 +42,7 @@ public class EventHandlerServer
                 e.setValue(e.getValue() - 1);
                 if(e.getValue() == 0)
                 {
-                    EntityPlayer player = FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerByUsername(e.getKey());
+                    PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUsername(e.getKey());
                     if(player != null)
                     {
                         shootTorch(player);
@@ -64,41 +56,19 @@ public class EventHandlerServer
         }
     }
 
-    @SubscribeEvent
-    public void onRegisterSound(RegistryEvent.Register<SoundEvent> event)
+    public void shootTorch(PlayerEntity player)
     {
-        Torched.soundRPT = new SoundEvent(new ResourceLocation("torched", "rpt")).setRegistryName(new ResourceLocation("torched", "rpt"));
-        Torched.soundTube = new SoundEvent(new ResourceLocation("torched", "tube")).setRegistryName(new ResourceLocation("torched", "tube"));
-
-        event.getRegistry().register(Torched.soundRPT);
-        event.getRegistry().register(Torched.soundTube);
-    }
-
-    @SubscribeEvent
-    public void onRegisterItem(RegistryEvent.Register<Item> event)
-    {
-        Torched.itemTorchGun = (new ItemTorchGun()).setFull3D().setRegistryName(new ResourceLocation("torched", "torchgun")).setUnlocalizedName("torched.torchgun").setCreativeTab(CreativeTabs.TOOLS);
-        Torched.itemTorchFirework = (new ItemTorchFirework()).setRegistryName(new ResourceLocation("torched", "torchfirework")).setUnlocalizedName("torched.torchfirework").setCreativeTab(CreativeTabs.TOOLS);
-        Torched.itemTorchLauncher = (new ItemTorchLauncher()).setRegistryName(new ResourceLocation("torched", "torchlauncher")).setFull3D().setUnlocalizedName("torched.torchlauncher").setCreativeTab(CreativeTabs.TOOLS);
-
-        event.getRegistry().register(Torched.itemTorchGun);
-        event.getRegistry().register(Torched.itemTorchFirework);
-        event.getRegistry().register(Torched.itemTorchLauncher);
-    }
-
-    public void shootTorch(EntityPlayer player)
-    {
-        playerDelay.put(player.getName(), 5);
-        ItemStack is = ItemHandler.getUsableDualHandedItem(player);
-        if(player.capabilities.isCreativeMode || is.getItem() instanceof ItemTorchGun && is.getItemDamage() < is.getMaxDamage() && EntityHelper.consumeInventoryItem(player.inventory, Item.getItemFromBlock(Blocks.TORCH)))
+        playerDelay.put(player.getName().getUnformattedComponentText(), 5);
+        ItemStack is = DualHandedItem.getUsableDualHandedItem(player);
+        if(player.abilities.isCreativeMode || is.getItem() instanceof ItemTorchGun && is.getDamage() < is.getMaxDamage() && EntityHelper.consumeInventoryItem(player.inventory, Blocks.TORCH.asItem()))
         {
-            if(!player.capabilities.isCreativeMode)
+            if(!player.abilities.isCreativeMode)
             {
-                is.setItemDamage(is.getItemDamage() + 1);
+                is.setDamage(is.getDamage() + 1);
                 player.inventory.markDirty();
             }
-            EntityHelper.playSoundAtEntity(player, Torched.soundTube, SoundCategory.PLAYERS, 0.5F, 0.85F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
-            player.world.spawnEntity(new EntityTorch(player.world, player));
+            EntityHelper.playSoundAtEntity(player, Torched.Sounds.TUBE.get(), SoundCategory.PLAYERS, 0.5F, 0.85F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
+            player.world.addEntity(new EntityTorch(Torched.EntityTypes.TORCH.get(), player.world).setShooter(player));
         }
     }
 
