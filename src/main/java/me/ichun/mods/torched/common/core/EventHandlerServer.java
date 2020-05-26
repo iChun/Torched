@@ -67,7 +67,7 @@ public class EventHandlerServer
                 is.setDamage(is.getDamage() + 1);
                 player.inventory.markDirty();
             }
-            EntityHelper.playSoundAtEntity(player, Torched.Sounds.TUBE.get(), SoundCategory.PLAYERS, 0.5F, 0.85F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
+            EntityHelper.playSound(player, Torched.Sounds.TUBE.get(), SoundCategory.PLAYERS, 0.5F, 0.85F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
             player.world.addEntity(new EntityTorch(Torched.EntityTypes.TORCH.get(), player.world).setShooter(player));
         }
     }

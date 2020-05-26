@@ -2,6 +2,7 @@ package me.ichun.mods.torched.common.item;
 
 import me.ichun.mods.ichunutil.common.entity.util.EntityHelper;
 import me.ichun.mods.ichunutil.common.item.DualHandedItem;
+import me.ichun.mods.torched.client.render.ItemRenderTorchLauncher;
 import me.ichun.mods.torched.common.Torched;
 import me.ichun.mods.torched.common.entity.EntityTorchFirework;
 import net.minecraft.entity.Entity;
@@ -15,6 +16,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
 
 
 public class ItemTorchLauncher extends Item
@@ -22,7 +26,13 @@ public class ItemTorchLauncher extends Item
 {
     public ItemTorchLauncher(Properties properties)
     {
-        super(properties);
+        super(DistExecutor.runForDist(() -> () -> attachISTER(properties), () -> () -> properties));
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static Properties attachISTER(Properties properties)
+    {
+        return properties.setISTER(() -> () -> ItemRenderTorchLauncher.INSTANCE);
     }
 
     @Override
@@ -44,7 +54,7 @@ public class ItemTorchLauncher extends Item
         {
             if(!world.isRemote)
             {
-                EntityHelper.playSoundAtEntity(player, Torched.Sounds.RPT.get(), SoundCategory.PLAYERS, 1.0F, 0.9F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
+                EntityHelper.playSound(player, Torched.Sounds.RPT.get(), SoundCategory.PLAYERS, 1.0F, 0.9F + (player.getRNG().nextFloat() * 2F - 1F) * 0.075F);
                 player.world.addEntity(new EntityTorchFirework(Torched.EntityTypes.TORCH_FIREWORK.get(), player.world).shot(player));
             }
             else

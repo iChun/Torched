@@ -100,12 +100,6 @@ public class EventHandlerClient
         }
     }
 
-    //    @SubscribeEvent
-    //    public void onModelRegistry(ModelRegistryEvent event)
-    //    {
-    //        ModelBakery.registerItemVariants(Torched.itemTorchFirework, new ResourceLocation("torched", "torchfirework"), new ResourceLocation("torched", "torchrpt"));
-    //    }
-
     public int firing;
 
     private boolean currentItemIsTorchGun;

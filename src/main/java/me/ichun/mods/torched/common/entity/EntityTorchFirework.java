@@ -397,7 +397,7 @@ public class EntityTorchFirework extends Entity
                 if(getGP() <= 0)
                 {
                     setActive(true);
-                    EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                    EntityHelper.playSound(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
                     fuel = gunpowderCount * 140F;
                 } //256 torches and 96 gunpowder
             }
@@ -409,7 +409,7 @@ public class EntityTorchFirework extends Entity
                 fuel = gunpowderCount * 140F;
                 addGP(-getGP());
                 setActive(true);
-                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                EntityHelper.playSound(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
         }
         else if(!world.isRemote && this.ticksExisted % 2L == 0)
@@ -460,7 +460,7 @@ public class EntityTorchFirework extends Entity
                 fuel = gunpowderCount * 140F;
                 addGP(-getGP());
                 setActive(true);
-                EntityHelper.playSoundAtEntity(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
+                EntityHelper.playSound(this, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.NEUTRAL, 3.0F, 1.0F);
             }
             else if(!world.getBlockState(thisPos.add(0, -1, 0)).isSolidSide(world, thisPos.add(0, -1, 0), Direction.UP))
             {

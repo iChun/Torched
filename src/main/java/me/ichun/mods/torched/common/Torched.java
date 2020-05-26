@@ -124,10 +124,10 @@ public class Torched
     {
         private static final DeferredRegister<Item> REGISTRY = new DeferredRegister<>(ForgeRegistries.ITEMS, MOD_ID);
 
-        public static final RegistryObject<ItemTorchGun> TORCH_GUN = REGISTRY.register("torchgun", () -> new ItemTorchGun(new Item.Properties().maxDamage(65).group(ItemGroup.TOOLS).setISTER(() -> () -> ItemRenderTorchGun.INSTANCE))); //Maxdmg = Max + 2
+        public static final RegistryObject<ItemTorchGun> TORCH_GUN = REGISTRY.register("torchgun", () -> new ItemTorchGun(new Item.Properties().maxDamage(65).group(ItemGroup.TOOLS))); //Maxdmg = Max + 2
         public static final RegistryObject<Item> TORCH_ROCKET = REGISTRY.register("torchrocket", () -> new Item(new Item.Properties().group(ItemGroup.TOOLS)));
         public static final RegistryObject<ItemTorchFirework> TORCH_FIREWORK = REGISTRY.register("torchfirework", () -> new ItemTorchFirework(new Item.Properties().group(ItemGroup.TOOLS)));
-        public static final RegistryObject<ItemTorchLauncher> TORCH_LAUNCHER = REGISTRY.register("torchlauncher", () -> new ItemTorchLauncher(new Item.Properties().maxDamage(9).group(ItemGroup.TOOLS).setISTER(() -> () -> ItemRenderTorchLauncher.INSTANCE)));
+        public static final RegistryObject<ItemTorchLauncher> TORCH_LAUNCHER = REGISTRY.register("torchlauncher", () -> new ItemTorchLauncher(new Item.Properties().maxDamage(9).group(ItemGroup.TOOLS)));
     }
 
     public static class Particles
