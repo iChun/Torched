@@ -491,7 +491,7 @@ public class EntityTorchFirework extends Entity
         Particle particle = Minecraft.getInstance().worldRenderer.addParticleUnchecked(Torched.Particles.FLAME.get(), true, this.getPosX() - mo.x * 0.3D, this.getPosY() - mo.y * 0.3D + 0.4D, this.getPosZ() - mo.z * 0.3D, mo.x * particleSpeed, mo.y * particleSpeed, mo.z * particleSpeed);
         if(particle != null)
         {
-            particle.multipleParticleScaleBy(scale);
+            particle.multiplyParticleScaleBy(scale);
         }
     }
 
@@ -501,7 +501,7 @@ public class EntityTorchFirework extends Entity
         if(!world.isRemote && !activating)
         {
             ItemStack is = player.getHeldItem(hand);
-            if(is.getItem() == Item.getItemFromBlock(Blocks.TORCH) && getTorches() < 512)
+            if(is.getItem() == Blocks.TORCH.asItem() && getTorches() < 512)
             {
                 addTorches(1);
                 if(!player.abilities.isCreativeMode)
