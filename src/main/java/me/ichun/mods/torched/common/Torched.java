@@ -102,7 +102,7 @@ public class Torched
 
     public static class EntityTypes
     {
-        private static final DeferredRegister<EntityType<?>> REGISTRY = new DeferredRegister<>(ForgeRegistries.ENTITIES, MOD_ID);
+        private static final DeferredRegister<EntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.ENTITIES, MOD_ID);
 
         public static final RegistryObject<EntityType<EntityTorch>> TORCH = REGISTRY.register("torch", () -> EntityType.Builder.create(EntityTorch::new, EntityClassification.MISC)
                 .size(0.5F, 0.5F)
@@ -122,7 +122,7 @@ public class Torched
 
     public static class Items
     {
-        private static final DeferredRegister<Item> REGISTRY = new DeferredRegister<>(ForgeRegistries.ITEMS, MOD_ID);
+        private static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, MOD_ID);
 
         public static final RegistryObject<ItemTorchGun> TORCH_GUN = REGISTRY.register("torchgun", () -> new ItemTorchGun(new Item.Properties().maxDamage(65).group(ItemGroup.TOOLS))); //Maxdmg = Max + 2
         public static final RegistryObject<Item> TORCH_ROCKET = REGISTRY.register("torchrocket", () -> new Item(new Item.Properties().group(ItemGroup.TOOLS)));
@@ -132,21 +132,21 @@ public class Torched
 
     public static class Particles
     {
-        private static final DeferredRegister<ParticleType<?>> REGISTRY = new DeferredRegister<>(ForgeRegistries.PARTICLE_TYPES, MOD_ID);
+        private static final DeferredRegister<ParticleType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, MOD_ID);
 
         public static final RegistryObject<BasicParticleType> FLAME = REGISTRY.register("flame", () -> new BasicParticleType(true));
     }
 
     public static class Recipes
     {
-        private static final DeferredRegister<IRecipeSerializer<?>> REGISTRY = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, MOD_ID);
+        private static final DeferredRegister<IRecipeSerializer<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MOD_ID);
 
-        public static final RegistryObject<IRecipeSerializer<RecipeTorchGun>> TORCH_GUN_REPAIR = REGISTRY.register("torchgun_repair", () -> new SpecialRecipeSerializer<>(RecipeTorchGun::new));
+        public static final RegistryObject<IRecipeSerializer<RecipeTorchGun>> TORCH_GUN_REPAIR = REGISTRY.register("torch_gun_repair", () -> new SpecialRecipeSerializer<>(RecipeTorchGun::new));
     }
 
     public static class Sounds
     {
-        private static final DeferredRegister<SoundEvent> REGISTRY = new DeferredRegister<>(ForgeRegistries.SOUND_EVENTS, MOD_ID); //.setRegistryName(new ResourceLocation("torched", "rpt") ??
+        private static final DeferredRegister<SoundEvent> REGISTRY = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, MOD_ID); //.setRegistryName(new ResourceLocation("torched", "rpt") ??
 
         public static final RegistryObject<SoundEvent> RPT = REGISTRY.register("rpt", () -> new SoundEvent(new ResourceLocation("torched", "rpt")));
         public static final RegistryObject<SoundEvent> TUBE = REGISTRY.register("tube", () -> new SoundEvent(new ResourceLocation("torched", "tube")));

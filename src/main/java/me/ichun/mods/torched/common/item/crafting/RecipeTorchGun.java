@@ -97,6 +97,6 @@ public class RecipeTorchGun extends SpecialRecipe
     @Override
     public IRecipeSerializer<?> getSerializer()
     {
-        return null;
+        return Torched.Recipes.TORCH_GUN_REPAIR.get();
     }
 }
