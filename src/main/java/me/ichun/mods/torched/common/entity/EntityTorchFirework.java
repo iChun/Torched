@@ -19,6 +19,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -136,7 +137,7 @@ public class EntityTorchFirework extends Entity
         double moX = (double)(-MathHelper.sin(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
         double moZ = (double)(MathHelper.cos(rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(rotationPitch / 180.0F * (float)Math.PI));
         double moY = (double)(-MathHelper.sin(rotationPitch / 180.0F * (float)Math.PI));
-        Vec3d fMo = firework.getMotion();
+        Vector3d fMo = firework.getMotion();
         setThrowableHeading(moX, moY, moZ, (float)Math.sqrt(fMo.x * fMo.x + fMo.y * fMo.y + fMo.z * fMo.z), 0.0F);
         setMotion(getMotion().x, fMo.y * 0.9D, getMotion().z);
 
@@ -272,11 +273,11 @@ public class EntityTorchFirework extends Entity
 
                 if(!getRocket())
                 {
-                    Vec3d mo = getMotion();
+                    Vector3d mo = getMotion();
                     setMotion(mo.x * 1.15D, mo.y + (isSplit ? -0.01D : 0.04D), mo.z * 1.15D);
                 }
 
-                Vec3d mo = getMotion();
+                Vector3d mo = getMotion();
                 boolean forceBlow = Math.abs(mo.x) > 5D || Math.abs(mo.z) > 5D;
                 if(collidedVertically && world.isRemote)
                 {
@@ -308,7 +309,7 @@ public class EntityTorchFirework extends Entity
                         }
                         else
                         {
-                            Vec3d hitVec = result.getHitVec();
+                            Vector3d hitVec = result.getHitVec();
                             mo = getMotion();
                             setPosition(hitVec.x - (mo.x * 1.05D), hitVec.y - (mo.y * 1.05D), hitVec.z - (mo.z * 1.05D));
                         }
@@ -447,7 +448,7 @@ public class EntityTorchFirework extends Entity
                     }
                 }
             }
-            BlockPos thisPos = new BlockPos(this);
+            BlockPos thisPos = new BlockPos(getPositionVec());
             if(world.getBlockState(thisPos).getBlock() == Blocks.FIRE)
             {
                 setFire(8);
@@ -484,7 +485,7 @@ public class EntityTorchFirework extends Entity
     @OnlyIn(Dist.CLIENT)
     public void spawnParticle()
     {
-        Vec3d mo = getMotion();
+        Vector3d mo = getMotion();
         double particleSpeed = 0.75D;
         float scale = 1.0F + (this.getRocket() ? 1.0F : this.getTorches() / 96F);
 
@@ -496,7 +497,7 @@ public class EntityTorchFirework extends Entity
     }
 
     @Override
-    public boolean processInitialInteract(PlayerEntity player, Hand hand)
+    public ActionResultType processInitialInteract(PlayerEntity player, Hand hand)
     {
         if(!world.isRemote && !activating)
         {
@@ -513,7 +514,7 @@ public class EntityTorchFirework extends Entity
                     }
                 }
                 player.swingArm(hand);
-                return true;
+                return ActionResultType.CONSUME;
             }
             else if(is.getItem() == Items.GUNPOWDER && getGP() < 512)
             {
@@ -527,7 +528,7 @@ public class EntityTorchFirework extends Entity
                     }
                 }
                 player.swingArm(hand);
-                return true;
+                return ActionResultType.CONSUME;
             }
             else if(is.getItem() == Items.FLINT_AND_STEEL)
             {
@@ -538,7 +539,7 @@ public class EntityTorchFirework extends Entity
                 }
                 initiator = player;
                 player.swingArm(hand);
-                return true;
+                return ActionResultType.CONSUME;
             }
             else if(is.getItem() == Items.GOLD_NUGGET && getSplits() < 16)
             {
@@ -552,15 +553,15 @@ public class EntityTorchFirework extends Entity
                     }
                 }
                 player.swingArm(hand);
-                return true;
+                return ActionResultType.CONSUME;
             }
         }
-        if(world.isRemote && (player.getHeldItem(hand).getItem() == Item.getItemFromBlock(Blocks.TORCH) || player.getHeldItem(hand).getItem() == Items.GUNPOWDER || player.getHeldItem(hand).getItem() == Items.FLINT_AND_STEEL || player.getHeldItem(hand).getItem() == Items.GOLD_NUGGET))
+        if(world.isRemote && (player.getHeldItem(hand).getItem() == Blocks.TORCH.asItem() || player.getHeldItem(hand).getItem() == Items.GUNPOWDER || player.getHeldItem(hand).getItem() == Items.FLINT_AND_STEEL || player.getHeldItem(hand).getItem() == Items.GOLD_NUGGET))
         {
             player.swingArm(hand);
-            return true;
+            return ActionResultType.SUCCESS;
         }
-        return false;
+        return ActionResultType.PASS;
     }
 
     @Override

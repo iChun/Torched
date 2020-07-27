@@ -9,13 +9,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 public class RenderTorch extends EntityRenderer<EntityTorch>
@@ -39,7 +40,7 @@ public class RenderTorch extends EntityRenderer<EntityTorch>
     }
 
     @Override
-    protected int getBlockLight(EntityTorch entityIn, float partialTicks) {
+    protected int getBlockLight(EntityTorch entityIn, BlockPos pos) {
         return 15;
     }
 

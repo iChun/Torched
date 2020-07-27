@@ -7,7 +7,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -119,7 +120,7 @@ public class RenderTorchFirework extends EntityRenderer<EntityTorchFirework>
     }
 
     @Override
-    protected int getBlockLight(EntityTorchFirework entityIn, float partialTicks) {
+    protected int getBlockLight(EntityTorchFirework entityIn, BlockPos pos) {
         return 15;
     }
 

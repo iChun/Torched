@@ -3,7 +3,10 @@ package me.ichun.mods.torched.common.entity;
 import me.ichun.mods.ichunutil.common.entity.util.EntityHelper;
 import me.ichun.mods.ichunutil.common.item.DualHandedItem;
 import me.ichun.mods.torched.common.Torched;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.WallTorchBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -25,6 +28,7 @@ import net.minecraft.network.play.server.SChangeGameStatePacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -161,7 +165,7 @@ public class EntityTorch extends Entity
             ceilingBounce--;
         }
 
-        Vec3d motion = getMotion();
+        Vector3d motion = getMotion();
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
             float var1 = MathHelper.sqrt(motion.x * motion.x + motion.z * motion.z);
@@ -223,7 +227,7 @@ public class EntityTorch extends Entity
 
                     if (this.shooter != null && collidedEnt != this.shooter && collidedEnt instanceof PlayerEntity && this.shooter instanceof ServerPlayerEntity)
                     {
-                        ((ServerPlayerEntity)this.shooter).connection.sendPacket(new SChangeGameStatePacket(6, 0.0F));
+                        ((ServerPlayerEntity)this.shooter).connection.sendPacket(new SChangeGameStatePacket(SChangeGameStatePacket.field_241770_g_, 0.0F)); //arrow sound
                     }
                 }
             }
@@ -350,7 +354,7 @@ public class EntityTorch extends Entity
     @OnlyIn(Dist.CLIENT)
     public void spawnParticle()
     {
-        Vec3d mo = getMotion();
+        Vector3d mo = getMotion();
         double particleSpeed = 0.75D;
         Minecraft.getInstance().particles.addParticle(Torched.Particles.FLAME.get(), this.getPosX() - mo.x * 0.3D, this.getPosY() - mo.y * 0.3D, this.getPosZ() - mo.z * 0.3D, mo.x * particleSpeed, mo.y * particleSpeed, mo.z * particleSpeed);
     }

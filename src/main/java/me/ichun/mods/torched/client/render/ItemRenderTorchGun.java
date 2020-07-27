@@ -11,24 +11,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemTransformVec3f;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.Random;
 
 @SuppressWarnings("deprecation")
 public class ItemRenderTorchGun extends ItemStackTileEntityRenderer
-    implements IModel
+        implements IModel
 {
     private static final ResourceLocation TEXTURE = new ResourceLocation("torched", "textures/model/torchgun.png");
     private static final ItemCameraTransforms ITEM_CAMERA_TRANSFORMS = new ItemCameraTransforms(
@@ -65,7 +65,7 @@ public class ItemRenderTorchGun extends ItemStackTileEntityRenderer
     }
 
     @Override
-    public void render(ItemStack itemstack, MatrixStack stack, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn)
+    public void func_239207_a_(ItemStack itemstack, ItemCameraTransforms.TransformType transformType, MatrixStack stack, IRenderTypeBuffer bufferIn, int combinedLightIn, int combinedOverlayIn)
     {
         setToOrigin(stack);
 
@@ -145,7 +145,7 @@ public class ItemRenderTorchGun extends ItemStackTileEntityRenderer
     }
 
     @Override
-    public void handleItemState(ItemStack stack, World world, LivingEntity entity)
+    public void handleItemState(ItemStack stack, ClientWorld world, LivingEntity entity)
     {
         if(entity instanceof AbstractClientPlayerEntity)
         {
