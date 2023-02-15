@@ -1,5 +1,6 @@
 package me.ichun.mods.torched.common;
 
+import me.ichun.mods.ichunutil.client.item.ItemEffectHandler;
 import me.ichun.mods.ichunutil.client.model.item.ItemModelRenderer;
 import me.ichun.mods.ichunutil.common.network.PacketChannel;
 import me.ichun.mods.torched.client.core.EventHandlerClient;
@@ -70,12 +71,14 @@ public class Torched
 
         channel = new PacketChannel(new ResourceLocation(MOD_ID, "channel"), PROTOCOL, PacketKeyEvent.class);
 
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             bus.addListener(this::onClientSetup);
             bus.addListener(this::onRegisterParticleFactory);
             bus.addListener(this::onModelBake);
 
             MinecraftForge.EVENT_BUS.register(eventHandlerClient = new EventHandlerClient());
+
+            ItemEffectHandler.init();
         });
     }
 
@@ -109,14 +112,14 @@ public class Torched
                 .setTrackingRange(64)
                 .setUpdateInterval(20)
                 .setShouldReceiveVelocityUpdates(true)
-                .build("from " + MOD_NAME + ". Ignore this.")
+                .build("an entity from " + MOD_NAME + ". Ignore this.")
         );
         public static final RegistryObject<EntityType<EntityTorchFirework>> TORCH_FIREWORK = REGISTRY.register("torch_firework", () -> EntityType.Builder.create(EntityTorchFirework::new, EntityClassification.MISC)
                 .size(1.0F, 1.0F)
                 .setTrackingRange(128)
                 .setUpdateInterval(2)
                 .setShouldReceiveVelocityUpdates(true)
-                .build("from " + MOD_NAME + ". Ignore this.")
+                .build("an entity from " + MOD_NAME + ". Ignore this.")
         );
     }
 

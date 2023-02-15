@@ -227,7 +227,7 @@ public class EntityTorch extends Entity
 
                     if (this.shooter != null && collidedEnt != this.shooter && collidedEnt instanceof PlayerEntity && this.shooter instanceof ServerPlayerEntity)
                     {
-                        ((ServerPlayerEntity)this.shooter).connection.sendPacket(new SChangeGameStatePacket(SChangeGameStatePacket.field_241770_g_, 0.0F)); //arrow sound
+                        ((ServerPlayerEntity)this.shooter).connection.sendPacket(new SChangeGameStatePacket(SChangeGameStatePacket.HIT_PLAYER_ARROW, 0.0F)); //arrow sound
                     }
                 }
             }
